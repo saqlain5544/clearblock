@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Clearblock ad lab</title>
+    <style>
+      body {
+        font: 16px/1.5 sans-serif;
+        max-width: 40rem;
+        margin: 2rem auto;
+        padding: 0 1rem;
+      }
+      .ad-banner,
+      #Ad-Container,
+      .sponsored-slot {
+        background: #c00;
+        color: #fff;
+        padding: 1.5rem;
+        margin: 1rem 0;
+      }
+      img {
+        display: block;
+        margin: 1rem 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Clearblock ad lab</h1>
+    <p>
+      Local fixture for unpacked testing. With Clearblock on, the red cosmetic slots
+      should disappear and the doubleclick / googlesyndication images should fail to load.
+    </p>
+    <div class="ad-banner">Generic cosmetic slot (.ad-banner) — should be hidden.</div>
+    <div id="Ad-Container">Generic cosmetic slot (#Ad-Container) — should be hidden.</div>
+    <div class="sponsored-slot">Not in EasyList generic hide — may remain visible.</div>
+    <img src="https://pagead2.googlesyndication.com/pagead/imgad?id=test" alt="blocked googlesyndication pixel" width="1" height="1" />
+    <img src="https://static.doubleclick.net/instream/ad_status.js" alt="blocked doubleclick asset" width="1" height="1" />
+    <img src="https://googleads.g.doubleclick.net/pagead/id" alt="blocked googleads pixel" width="1" height="1" />
+    <p id="status">Checking network blocks…</p>
+    <script>
+      const urls = [
+        "https://pagead2.googlesyndication.com/pagead/imgad?id=test",
+        "https://googleads.g.doubleclick.net/pagead/id",
+        "https://static.doubleclick.net/instream/ad_status.js",
+      ];
+      Promise.all(
+        urls.map((url) =>
+          fetch(url, { mode: "no-cors", cache: "no-store" })
+            .then(() => ({ url, ok: true }))
+            .catch(() => ({ url, ok: false }))
+        )
+      ).then((results) => {
+        document.getElementById("status").textContent = results
+          .map((r) => (r.ok ? `request issued: ${r.url}` : `failed: ${r.url}`))
+          .join(" | ");
+      });
+    </script>
+  </body>
+</html>

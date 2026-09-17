@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Clearblock</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div id="app" data-state="loading">
+      <header class="top">
+        <div class="brand">
+          <img class="logo" src="../icons/icon32.png" alt="" width="24" height="24" />
+          <div>
+            <h1>Clearblock</h1>
+            <p class="tagline">Local ad blocker · no account, no cloud</p>
+          </div>
+        </div>
+        <label class="switch" title="Turn blocking on or off for every site">
+          <input id="enabled" type="checkbox" disabled />
+          <span class="slider"></span>
+          <span class="switch-label" id="enabled-label">…</span>
+        </label>
+      </header>
+
+      <section id="status-banner" class="banner" hidden></section>
+
+      <section class="stats" aria-live="polite">
+        <div class="stat">
+          <p class="stat-label">Ads blocked</p>
+          <p class="stat-value" id="blocked">—</p>
+          <p class="stat-hint" id="blocked-hint">Reading saved counts…</p>
+        </div>
+        <div class="stat">
+          <p class="stat-label">Estimated data saved</p>
+          <p class="stat-value" id="saved">—</p>
+          <p class="stat-hint" id="saved-hint">Based on typical ad sizes, kept on this device.</p>
+        </div>
+      </section>
+
+      <section class="site">
+        <div>
+          <p class="site-kicker">This page</p>
+          <p class="site-host" id="site-host">Checking the current tab…</p>
+          <p class="site-copy" id="site-copy"></p>
+        </div>
+        <button id="pause-btn" type="button" disabled>Pause on this site</button>
+      </section>
+
+      <p class="footnote" id="footnote">
+        Filter lists ship inside the extension, so blocking still works offline. Counts survive Chrome restarts.
+      </p>
+    </div>
+    <script src="../src/shared.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

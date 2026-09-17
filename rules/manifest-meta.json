@@ -1,0 +1,9 @@
+{
+  "easylistVersion": "Version: 202609171418",
+  "youtubeRules": 88,
+  "adRules": 26000,
+  "allowRules": 400,
+  "genericSelectors": 13256,
+  "specificHosts": 6836,
+  "specificSelectors": 13168
+}
