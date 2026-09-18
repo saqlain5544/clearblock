@@ -96,6 +96,7 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
 .ad-skybox-sticky, .ad-intromercial, .ad-gambling-partner,
 #leader_middle, #leader_plus_top, #skybox_sticky, #intromercial,
 [data-ad-unit="leader_middle"], [data-ad="leader-middle"],
+[data-pogo], [data-pogo="main"], [data-pogo="footer"], [data-pogo="top"], [data-pogo="sidebar"],
 [data-lab-ad] {
   display: none !important;
 }
@@ -220,6 +221,11 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     "#intromercial",
     '[data-ad-unit="leader_middle"]',
     '[data-ad="leader-middle"]',
+    "[data-pogo]",
+    '[data-pogo="main"]',
+    '[data-pogo="footer"]',
+    '[data-pogo="top"]',
+    '[data-pogo="sidebar"]',
   ];
 
   const NAG_RE =
@@ -537,7 +543,16 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
       .replace(/["']/g, "")
       .replace(/\s+/g, " ")
       .trim();
+    if (!text || /^(none|normal|auto)$/i.test(text)) return false;
     return /^(advertisement|advertisements)$/i.test(text);
+  }
+
+  function pseudoContent(node, which) {
+    try {
+      return getComputedStyle(node, which).content || "";
+    } catch {
+      return "";
+    }
   }
 
   function hideBareAdLabels() {
@@ -545,28 +560,53 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     const nodes = document.querySelectorAll("span, div, small, p, aside, figcaption, section");
     for (const node of nodes) {
       const text = (node.textContent || "").replace(/\s+/g, " ").trim();
-      let pseudo = "";
-      if (!text) {
-        try {
-          const before = getComputedStyle(node, "::before").content || "";
-          const after = getComputedStyle(node, "::after").content || "";
-          pseudo = `${before} ${after}`.replace(/["']/g, "").replace(/\s+/g, " ").trim();
-        } catch {
-          pseudo = "";
-        }
+      const before = pseudoContent(node, "::before");
+      const after = pseudoContent(node, "::after");
+      if (
+        !isAdvertisementLabelText(text) &&
+        !isAdvertisementLabelText(before) &&
+        !isAdvertisementLabelText(after)
+      ) {
+        continue;
       }
-      if (!isAdvertisementLabelText(text) && !isAdvertisementLabelText(pseudo)) continue;
+      if (text.length > 80 && !isAdvertisementLabelText(text)) continue;
       if (node.querySelector?.("video, audio, #movie_player")) continue;
       hideNode(node, true);
       let parent = node.parentElement;
       for (let i = 0; i < 4 && parent && parent !== document.body; i += 1) {
         if (parent.querySelector?.("video, audio, #movie_player")) break;
+        if (/^(MAIN|ARTICLE|HEADER|NAV|FOOTER)$/i.test(parent.tagName)) break;
         const ptext = (parent.textContent || "").replace(/\s+/g, " ").trim();
         const cls = typeof parent.className === "string" ? parent.className : parent.getAttribute?.("class") || "";
         const wrapper = /media-ui-(?:BaseAd|BoxAd|ImmersiveAd|FullWidthAd_fullWidthAd)|adPlaceholder/i.test(cls);
         if (ptext.length > 200) break;
         if (ptext && !isAdvertisementLabelText(ptext) && !wrapper) break;
-        if (!ptext && !wrapper) break;
+        hideNode(parent, true);
+        parent = parent.parentElement;
+      }
+    }
+  }
+
+  function hidePogoSlots() {
+    if (!enabled) return;
+    let nodes;
+    try {
+      nodes = document.querySelectorAll("[data-pogo]");
+    } catch {
+      return;
+    }
+    for (const node of nodes) {
+      const video = node.querySelector?.("video");
+      if (video && video.videoWidth > 0) continue;
+      const text = (node.innerText || "").replace(/\s+/g, " ").trim();
+      if (text.length > 80) continue;
+      hideNode(node, true);
+      let parent = node.parentElement;
+      for (let i = 0; i < 3 && parent && parent !== document.body; i += 1) {
+        if (parent.querySelector?.("video, audio, #movie_player")) break;
+        if (/^(MAIN|ARTICLE|HEADER|NAV|FOOTER)$/i.test(parent.tagName)) break;
+        const ptext = (parent.innerText || "").replace(/\s+/g, " ").trim();
+        if (ptext.length > 40) break;
         hideNode(parent, true);
         parent = parent.parentElement;
       }
@@ -674,6 +714,7 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     hidePublisherAdChrome();
     hideAdvertisingContentCards();
     hideBareAdLabels();
+    hidePogoSlots();
     hideBloombergAdSlots();
     hideSportsAdSlots();
     hideOptidigitalSlots();

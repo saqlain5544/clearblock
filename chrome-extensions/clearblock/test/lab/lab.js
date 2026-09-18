@@ -452,6 +452,16 @@
         sports.style.cssText = "width:100%;min-height:72px;margin:12px auto;background:#e8e8e8;";
         document.body.appendChild(sports);
       }, 3400);
+      setTimeout(() => {
+        const pogo = el("div", {
+          class: "mt-12",
+          "data-pogo": "footer",
+          id: "footer-1",
+          "data-lab-ad": "lifehacker-pogo-delayed",
+        });
+        pogo.style.cssText = "display:grid;width:100%;min-height:72px;margin:12px auto;background:#f7f7f7;";
+        document.body.appendChild(pogo);
+      }, 3500);
     }
     const feed = document.getElementById("fb-feed");
     if (feed) {
