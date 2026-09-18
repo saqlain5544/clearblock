@@ -661,6 +661,29 @@
         document.body.appendChild(rail);
       }, 5000);
       setTimeout(() => {
+        const river = el("div", { class: "b-river", "data-lab-content": "dt-river-delayed" });
+        river.style.cssText = "max-width:1020px;margin:12px auto;background:#fff;color:#111;padding:8px;";
+        const organicStory = el("article", { "data-lab-content": "dt-organic-story-delayed" });
+        organicStory.textContent = "Gears of War: E-Day PC requirements are here";
+        const partners = el("div", {
+          class: "b-aside b-river__aside b-river__item",
+          "data-lab-ad": "digitaltrends-partners-delayed",
+        });
+        const heading = el("div", { class: "b-aside__heading" });
+        heading.textContent = "FROM OUR PARTNERS";
+        const item = el("div", { class: "b-aside__item" });
+        const sponsor = el("div", { class: "b-aside__sponsor" });
+        sponsor.textContent = "IN PARTNERSHIP WITH METRO BY T-MOBILE";
+        item.appendChild(sponsor);
+        item.appendChild(document.createTextNode(" How Metro by T-Mobile is making wireless plans simpler"));
+        partners.appendChild(heading);
+        partners.appendChild(item);
+        partners.style.cssText = "min-height:72px;background:#eee;padding:8px;";
+        river.appendChild(organicStory);
+        river.appendChild(partners);
+        document.body.appendChild(river);
+      }, 5050);
+      setTimeout(() => {
         const row = el("div", { class: "HomepagePromos__row", "data-lab-content": "natgeo-latest-delayed" });
         row.style.cssText = "display:flex;gap:12px;max-width:1020px;margin:12px auto;background:#111;color:#fff;padding:8px;";
         const organicPromo = el("div", { class: "HomepagePromos__promo", "data-lab-content": "natgeo-editorial-delayed" });

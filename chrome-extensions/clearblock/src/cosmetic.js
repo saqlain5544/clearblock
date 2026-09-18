@@ -970,6 +970,43 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
       if (card.querySelector?.("video")?.videoWidth > 0) continue;
       hideNode(card, true);
     }
+    let sponsors;
+    try {
+      sponsors = document.querySelectorAll(".b-aside__sponsor");
+    } catch {
+      return;
+    }
+    for (const node of sponsors) {
+      if (node.querySelector?.("video")?.videoWidth > 0) continue;
+      const text = (node.innerText || "").replace(/\s+/g, " ").trim();
+      if (!/^in partnership with\b/i.test(text)) continue;
+      const card = node.closest(".b-aside__item");
+      if (!card || card === document.body) continue;
+      if (card.matches?.(".b-aside, .b-river, .b-river__list, section, main, header, nav, footer")) continue;
+      if (card.querySelector?.("video")?.videoWidth > 0) continue;
+      hideNode(card, true);
+    }
+    let asides;
+    try {
+      asides = document.querySelectorAll(".b-aside");
+    } catch {
+      return;
+    }
+    for (const aside of asides) {
+      if (!aside.querySelector?.(".b-aside__sponsor")) continue;
+      const items = [...aside.querySelectorAll(".b-aside__item")];
+      if (!items.length) continue;
+      const allPartner = items.every((item) => {
+        const slug = item.querySelector(".b-aside__sponsor");
+        const t = (slug?.innerText || "").replace(/\s+/g, " ").trim();
+        const s = getComputedStyle(item);
+        return /^in partnership with\b/i.test(t) || s.display === "none";
+      });
+      if (!allPartner) continue;
+      if (aside.matches?.(".b-river, .b-river__list, main, header, nav, footer")) continue;
+      if (aside.querySelector?.("video")?.videoWidth > 0) continue;
+      hideNode(aside, true);
+    }
   }
 
   function hideNatGeoPaidContent() {
