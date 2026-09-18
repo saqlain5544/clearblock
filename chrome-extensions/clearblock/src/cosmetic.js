@@ -337,18 +337,18 @@ iframe[id^="google_ads_iframe"],
     for (const node of nodes) {
       if (node.tagName === "SCRIPT" || node.tagName === "STYLE") continue;
       hideNode(node, true);
-      const parent = node.parentElement;
-      if (!parent || parent === document.body || parent.id === "app" || parent.id === "main") continue;
-      if (parent.querySelector?.("video, audio, #movie_player")) continue;
-      const text = (parent.innerText || "").replace(/\s+/g, " ").trim();
-      let before = "";
-      try {
-        before = parent.ownerDocument.defaultView.getComputedStyle(parent, "::before").content || "";
-      } catch {
-        before = "";
-      }
-      if (!text || /^(advertisement|advertisements)$/i.test(text) || /advertisement/i.test(before)) {
-        hideNode(parent, true);
+      let parent = node.parentElement;
+      for (let i = 0; i < 5 && parent && parent !== document.body; i += 1) {
+        if (parent.id === "app" || parent.id === "main" || parent.tagName === "BODY") break;
+        if (parent.querySelector?.("video, audio, #movie_player")) break;
+        const text = (parent.innerText || "").replace(/\s+/g, " ").trim();
+        const cls = typeof parent.className === "string" ? parent.className : parent.getAttribute?.("class") || "";
+        const empty = !text || /^(advertisement|advertisements)$/i.test(text);
+        const placeholder = /min-h-\[(?:250|350)px\]|optidigital|bg-neutral-100|bg-neutral-800/.test(cls);
+        if (!empty) break;
+        if (i === 0 || placeholder) hideNode(parent, true);
+        else break;
+        parent = parent.parentElement;
       }
     }
   }
