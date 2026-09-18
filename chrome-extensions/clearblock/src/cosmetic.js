@@ -47,6 +47,8 @@ iframe[id^="google_ads_iframe"], [id*="google_ads_iframe"], [id^="div-gpt-ad"],
 .sbv-video-player, .AdHolder,
 .s-widget-sponsored-label-text,
 .s-widget-container:has(.s-widget-sponsored-label-text),
+.s-widget-container:has([class*="ad-feedback-text"]),
+.s-widget-container:has([class*="adFeedback"]),
 .atwb-carousel, .sbb-carousel-l:has(.attribution-text-l),
 .plp-ninja-carousel:has(.attribution-text-l),
 .attribution-text-l,
@@ -97,6 +99,8 @@ iframe[id^="google_ads_iframe"],
     ".AdHolder",
     ".s-widget-sponsored-label-text",
     ".s-widget-container:has(.s-widget-sponsored-label-text)",
+    ".s-widget-container:has([class*='ad-feedback-text'])",
+    ".s-widget-container:has([class*='adFeedback'])",
     ".atwb-carousel",
     ".sbb-carousel-l:has(.attribution-text-l)",
     ".plp-ninja-carousel:has(.attribution-text-l)",
@@ -248,7 +252,7 @@ iframe[id^="google_ads_iframe"],
   function hideRetailSponsored() {
     if (!enabled) return;
     const nodes = document.querySelectorAll(
-      "[data-test='container-cdui-item-wrapper'], [data-test='text-quill-insert-0'], .attribution-text-l, .s-widget-sponsored-label-text, .puis-sponsored-label-text"
+      "[data-test='container-cdui-item-wrapper'], [data-test='text-quill-insert-0'], .attribution-text-l, .s-widget-sponsored-label-text, .puis-sponsored-label-text, [class*='ad-feedback-text'], [class*='adFeedback']"
     );
     for (const node of nodes) {
       const text = (node.innerText || "").replace(/\s+/g, " ").trim();
