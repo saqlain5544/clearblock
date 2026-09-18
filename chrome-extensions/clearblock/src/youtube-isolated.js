@@ -14,7 +14,6 @@
   const WALL_SELECTORS = [
     "ytd-enforcement-message-view-model",
     "tp-yt-paper-dialog:has(ytd-enforcement-message-view-model)",
-    ".yt-playability-error-supported-renderers",
     "ytd-popup-container:has(ytd-enforcement-message-view-model)",
   ];
 
@@ -177,6 +176,10 @@ ytm-promoted-sparkles-web-renderer,
     }
   }
 
+  function isBotCheck(text) {
+    return /sign in to confirm you.?re not a bot|confirm you.?re not a bot|login_required/i.test(text || "");
+  }
+
   function dismissAntiAdblock() {
     for (const selector of WALL_SELECTORS) {
       let nodes;
@@ -186,12 +189,14 @@ ytm-promoted-sparkles-web-renderer,
         continue;
       }
       for (const wall of nodes) {
+        if (isBotCheck(wall.textContent || "")) continue;
         wall.remove();
         report("hide");
       }
     }
     for (const node of document.querySelectorAll(".ytp-error, tp-yt-paper-dialog, ytd-popup-container")) {
       const text = (node.textContent || "").slice(0, 400);
+      if (isBotCheck(text)) continue;
       if (NAG_RE.test(text)) {
         node.remove();
         report("hide");

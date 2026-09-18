@@ -36,6 +36,14 @@ ytd-rich-item-renderer:has(ytd-ad-slot-renderer),
 [class*="ytp-ad-"], .ytp-flyout-cta, .ytp-paid-content-overlay,
 .jw-ad, .video-js-ad, .ima-ad-container, .vast-ad,
 iframe[id^="google_ads"], iframe[src*="doubleclick"], iframe[src*="googlesyndication"],
+.fave-ad-playing #overlay-root, .fave-player-container.fave-ad-playing #overlay-root,
+.fave-ad-playing .pui_ad, .fave-ad-slate,
+.s-item--ad, .s-item__ad, .s-item--sponsored, .s-card--ad, .promoted-listing,
+.s-result-item:has(.puis-sponsored-label-text),
+.s-result-item:has(.sponsored-brand-label-info-desktop),
+.sbv-video-container, .sb-video-creative, .rush-component.sbv-video-single-product,
+iframe[id^="google_ads_iframe"],
+.np_AdSlot, .dailymotion-ad, .promoted-post, [data-promoted="true"],
 .fc-ab-root, .fc-dialog, .fc-whitelist-blocking, [class^="fc-ab"],
 .adblock-wall, .adblock-overlay, .adblock-modal, .adb-overlay, .adb-wall,
 #adblock-notify, .please-disable-adblock, [class*="adblock-wall"],
@@ -58,6 +66,21 @@ iframe[id^="google_ads"], iframe[src*="doubleclick"], iframe[src*="googlesyndica
     ".please-disable-adblock",
     "[data-anti-adblock]",
     "ytd-enforcement-message-view-model",
+    ".fave-ad-playing #overlay-root",
+    ".fave-player-container.fave-ad-playing #overlay-root",
+    ".s-item--ad",
+    ".s-item--sponsored",
+    ".promoted-listing",
+    ".promoted-post",
+    "[data-promoted='true']",
+    ".np_AdSlot",
+    ".dailymotion-ad",
+    ".s-result-item:has(.puis-sponsored-label-text)",
+    ".s-result-item:has(.sponsored-brand-label-info-desktop)",
+    ".sbv-video-container",
+    ".sb-video-creative",
+    "iframe[id^='google_ads']",
+    "iframe[id^='google_ads_iframe']",
   ];
 
   const NAG_RE =
@@ -79,7 +102,7 @@ iframe[id^="google_ads"], iframe[src*="doubleclick"], iframe[src*="googlesyndica
     try {
       if (
         node.matches(
-          '[data-lab-ad], ytd-ad-slot-renderer, ytd-display-ad-renderer, ytd-in-feed-ad-layout-renderer, ytd-promoted-sparkles-web-renderer, ytd-companion-slot-renderer, ytd-video-masthead-ad-v3-renderer, ytd-promoted-video-renderer, ins.adsbygoogle, .adsbygoogle, [id*="google_ads"], [id*="div-gpt-ad"], [class*="div-gpt-ad"], .OUTBRAIN, .taboola, [id^="taboola-"], .trc_rbox, [aria-label="Sponsored"], .fb-instream-ad, .ima-ad-container, .adblock-wall, .fc-ab-root, [data-anti-adblock]'
+          '[data-lab-ad], ytd-ad-slot-renderer, ytd-display-ad-renderer, ytd-in-feed-ad-layout-renderer, ytd-promoted-sparkles-web-renderer, ytd-companion-slot-renderer, ytd-video-masthead-ad-v3-renderer, ytd-promoted-video-renderer, ins.adsbygoogle, .adsbygoogle, [id*="google_ads"], [id*="div-gpt-ad"], [class*="div-gpt-ad"], .OUTBRAIN, .taboola, [id^="taboola-"], .trc_rbox, [aria-label="Sponsored"], .fb-instream-ad, .ima-ad-container, .adblock-wall, .fc-ab-root, [data-anti-adblock], .s-item--ad, .AdHolder, .sbv-video-container, .puis-sponsored-label-text'
         )
       ) {
         return true;
@@ -110,14 +133,15 @@ iframe[id^="google_ads"], iframe[src*="doubleclick"], iframe[src*="googlesyndica
     return false;
   }
 
-  function hideNode(node) {
-    if (!node || hidden.has(node) || isProtected(node)) return;
+  function hideNode(node, force) {
+    if (!node || hidden.has(node)) return;
+    if (!force && isProtected(node)) return;
     hidden.add(node);
     node.style.setProperty("display", "none", "important");
     hiddenCount += 1;
   }
 
-  function hideMatches(selectors) {
+  function hideMatches(selectors, force) {
     if (!enabled || !selectors.length) return;
     for (const selector of selectors) {
       let nodes;
@@ -126,7 +150,7 @@ iframe[id^="google_ads"], iframe[src*="doubleclick"], iframe[src*="googlesyndica
       } catch {
         continue;
       }
-      for (const node of nodes) hideNode(node);
+      for (const node of nodes) hideNode(node, force);
     }
     flushCosmeticCount();
   }
@@ -143,6 +167,7 @@ iframe[id^="google_ads"], iframe[src*="doubleclick"], iframe[src*="googlesyndica
       }
       const text = (node.innerText || node.textContent || "").replace(/\s+/g, " ").slice(0, 420);
       if (!NAG_RE.test(text)) continue;
+      if (/sign in to confirm you.?re not a bot|confirm you.?re not a bot/i.test(text)) continue;
       const style = node.ownerDocument.defaultView.getComputedStyle(node);
       const position = style.position;
       const covers =
@@ -179,8 +204,8 @@ iframe[id^="google_ads"], iframe[src*="doubleclick"], iframe[src*="googlesyndica
   }
 
   function sweep() {
-    hideMatches(EXTRA_HIDE);
-    hideMatches(specificSelectors);
+    hideMatches(EXTRA_HIDE, true);
+    hideMatches(specificSelectors, false);
     dismissNags();
   }
 
@@ -224,7 +249,7 @@ iframe[id^="google_ads"], iframe[src*="doubleclick"], iframe[src*="googlesyndica
           specificSelectors.map((sel) => sel + "{display:none!important}").join("\n"),
           "clearblock-specific"
         );
-        hideMatches(specificSelectors);
+        hideMatches(specificSelectors, false);
       }
     } catch {
       // Missing map should not break the page.

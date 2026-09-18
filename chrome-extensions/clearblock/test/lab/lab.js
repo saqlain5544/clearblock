@@ -53,6 +53,10 @@
     "https://script.hotjar.com/modules.js",
     "https://clarity.ms/tag/lab",
     "https://www.google-analytics.com/plugins/ua/linkid.js",
+    "https://ads.dailymotion.com/js/ads.js",
+    "https://ad.dailymotion.com/js/ads.js",
+    "https://csync.smilewanted.com/",
+    "https://fundingchoicesmessages.google.com/i/lab.js",
   ];
 
   function isVisible(el) {
@@ -107,11 +111,20 @@
     const videoOk = videos.length === 0 || videos.some((v) => !v.error && (v.t > 0 || v.w > 0 || !v.paused));
     const adsOk = ads.visible === 0;
     const health = scanPlayerHealth();
+    const bot = document.querySelector("[data-lab-content='bot-check']");
+    let botLine = "";
+    if (bot) {
+      const s = getComputedStyle(bot);
+      const r = bot.getBoundingClientRect();
+      const vis = s.display !== "none" && s.visibility !== "hidden" && r.height > 8;
+      botLine = `<span class="${vis ? "ok" : "fail"}">Bot-check interstitial ${vis ? "visible (not hidden)" : "HIDDEN — player would look stuck"}</span>`;
+    }
     el.innerHTML = `
       <span>${document.title}</span>
       <span class="${adsOk ? "ok" : "fail"}">Ads hidden <strong>${ads.hidden}/${ads.total}</strong> · leftover ${ads.visible}</span>
       <span class="${videoOk ? "ok" : "fail"}">Content video ${videoOk ? "playing" : "blocked/failed"}</span>
       <span class="${health.ok ? "ok" : "fail"}">Player ${health.ok ? "unstuck" : health.soughtAway ? "seeked content" : "stuck"} · rate ${health.rate || "–"}</span>
+      ${botLine}
       <span class="${netOk ? "ok" : ""}">${netLine}</span>
       ${extra || ""}
     `;

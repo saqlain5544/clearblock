@@ -111,6 +111,8 @@ MEDIA_ALLOW_DOMAINS = [
     "mux.dev",
     "mozilla.net",
     "mozilla.org",
+    "media.cnn.com",
+    "cdn.cnn.com",
 ]
 
 MEDIA_ALLOW_PATHS = [
@@ -246,6 +248,9 @@ YOUTUBE_AND_CORE = [
     "||facebook.com/tr",
     "||fundingchoicesmessages.google.com^",
     "||fundingchoices.google.com^",
+    "||ad.dailymotion.com^",
+    "||ads.dailymotion.com^",
+    "||smilewanted.com^",
 ]
 
 KEYWORD_RE = re.compile(
