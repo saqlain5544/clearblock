@@ -44,6 +44,12 @@ iframe[id^="google_ads_iframe"], [id*="google_ads_iframe"], [id^="div-gpt-ad"],
 .s-result-item:has(.puis-sponsored-label-text),
 .s-result-item:has(.sponsored-brand-label-info-desktop),
 .sbv-video-container, .sb-video-creative, .rush-component.sbv-video-single-product,
+.sbv-video-player, .AdHolder,
+.s-widget-sponsored-label-text,
+.s-widget-container:has(.s-widget-sponsored-label-text),
+.atwb-carousel, .sbb-carousel-l:has(.attribution-text-l),
+.plp-ninja-carousel:has(.attribution-text-l),
+.attribution-text-l,
 iframe[id^="google_ads_iframe"],
 .np_AdSlot, .dailymotion-ad, .promoted-post, [data-promoted="true"],
 .fc-ab-root, .fc-dialog, .fc-whitelist-blocking, [class^="fc-ab"],
@@ -87,6 +93,14 @@ iframe[id^="google_ads_iframe"],
     ".s-result-item:has(.sponsored-brand-label-info-desktop)",
     ".sbv-video-container",
     ".sb-video-creative",
+    ".sbv-video-player",
+    ".AdHolder",
+    ".s-widget-sponsored-label-text",
+    ".s-widget-container:has(.s-widget-sponsored-label-text)",
+    ".atwb-carousel",
+    ".sbb-carousel-l:has(.attribution-text-l)",
+    ".plp-ninja-carousel:has(.attribution-text-l)",
+    ".attribution-text-l",
     "iframe[id^='google_ads']",
     "iframe[id^='google_ads_iframe']",
     "[id^='google_ads_iframe']",
@@ -234,16 +248,24 @@ iframe[id^="google_ads_iframe"],
   function hideRetailSponsored() {
     if (!enabled) return;
     const nodes = document.querySelectorAll(
-      "[data-test='container-cdui-item-wrapper'], [data-test='text-quill-insert-0']"
+      "[data-test='container-cdui-item-wrapper'], [data-test='text-quill-insert-0'], .attribution-text-l, .s-widget-sponsored-label-text, .puis-sponsored-label-text"
     );
     for (const node of nodes) {
-      const text = (node.innerText || "").trim();
-      if (!/^sponsored$/i.test(text)) continue;
+      const text = (node.innerText || "").replace(/\s+/g, " ").trim();
+      if (!/^sponsored\b/i.test(text)) continue;
       const card =
+        node.closest(".atwb-carousel") ||
+        node.closest(".plp-ninja-carousel") ||
+        node.closest(".sbb-carousel-l") ||
+        node.closest(".s-widget-container") ||
+        node.closest(".s-result-item") ||
+        node.closest("[data-test='ListingPageProductListing']") ||
         node.closest("a[data-test='content']") ||
         node.closest("[data-test='container-cdui']") ||
         node.parentElement;
-      if (card) hideNode(card, true);
+      if (card && !card.querySelector?.("video.html5-main-video, #movie_player")) {
+        hideNode(card, true);
+      }
     }
   }
 
