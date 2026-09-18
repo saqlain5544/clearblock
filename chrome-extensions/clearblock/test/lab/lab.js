@@ -700,6 +700,25 @@
         row.appendChild(paid);
         document.body.appendChild(row);
       }, 5100);
+      setTimeout(() => {
+        const carousel = el("ul", { class: "Carousel__Inner", "data-lab-content": "natgeo-carousel-delayed" });
+        carousel.style.cssText = "display:flex;gap:12px;max-width:1020px;margin:12px auto;background:#111;color:#fff;padding:8px;list-style:none;";
+        const organicSlide = el("li", { class: "CarouselSlide", "data-lab-content": "natgeo-carousel-editorial-delayed" });
+        organicSlide.textContent = "FROM THE ARCHIVES National Geographic’s Vintage Photos of a Young Dolly Parton";
+        const paidSlide = el("li", { class: "CarouselSlide", "data-lab-ad": "natgeo-paid-carousel-delayed" });
+        const tile = el("div", { class: "RegularStandardPrismTile" });
+        const wrap = el("ul", { class: "SectionLabelWrapper RegularStandardPrismTile__SectionLabel" });
+        const slug = el("li", { class: "SectionLabel" });
+        slug.textContent = "Paid Content";
+        wrap.appendChild(slug);
+        tile.appendChild(wrap);
+        tile.appendChild(document.createTextNode(" On Mexico's Riviera Maya, Nature and Humanity Intertwine"));
+        paidSlide.appendChild(tile);
+        paidSlide.style.cssText = "min-height:72px;background:#333;padding:8px;";
+        carousel.appendChild(organicSlide);
+        carousel.appendChild(paidSlide);
+        document.body.appendChild(carousel);
+      }, 5150);
     }
     const feed = document.getElementById("fb-feed");
     if (feed) {

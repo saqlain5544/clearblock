@@ -1013,7 +1013,9 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     if (!enabled) return;
     let nodes;
     try {
-      nodes = document.querySelectorAll(".TextBadge.promoted, .ListItem__TagWrapper, .label");
+      nodes = document.querySelectorAll(
+        ".TextBadge.promoted, .ListItem__TagWrapper, .label, .SectionLabel, .SectionLabelWrapper, .RegularStandardPrismTile__SectionLabel"
+      );
     } catch {
       return;
     }
@@ -1022,17 +1024,20 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
       const text = (node.innerText || "").replace(/\s+/g, " ").trim();
       if (!/^paid content$/i.test(text)) continue;
       const card =
+        node.closest(".CarouselSlide") ||
+        node.closest(".RegularStandardPrismTile") ||
         node.closest(".HomepagePromos__promo") ||
         node.closest(".ListItemWrapper") ||
         node.closest(".ListItem");
       if (!card || card === document.body) continue;
       if (
         card.matches?.(
-          ".HomepagePromos__row, .HomepagePromos, .GridListContainer, .PageLayout__Main, main, header, nav, footer"
+          ".HomepagePromos__row, .HomepagePromos, .GridListContainer, .PageLayout__Main, .Carousel__Inner, .Carousel__Outer, .Carousel__Wrapper, .Carousel, .CarouselModule, .CarouselModule__CarouselContainer, ul, ol, main, header, nav, footer"
         )
       ) {
         continue;
       }
+      if (/^(UL|OL)$/i.test(card.tagName)) continue;
       if (card.querySelector?.("video")?.videoWidth > 0) continue;
       hideNode(card, true);
     }
