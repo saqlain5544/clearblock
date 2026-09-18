@@ -815,6 +815,21 @@
         list.appendChild(sponsored);
         document.body.appendChild(list);
       }, 5400);
+      setTimeout(() => {
+        const footer = el("footer", { class: "c-main-footer", "data-lab-content": "tac-footer-delayed" });
+        footer.style.cssText = "max-width:1200px;margin:12px auto;background:#fff;color:#111;padding:8px;";
+        footer.textContent =
+          "The American Ideas Institute is a nonprofit, non-partisan 501(c)(3) organization based in Washington, D.C.";
+        const overlay = el("div", {
+          class: "c-main-footer__ad-overlay js-ad-footer",
+          "data-lab-ad": "tac-footer-ad-delayed",
+        });
+        overlay.style.cssText = "min-height:32px;background:#eee;padding:8px;";
+        overlay.innerHTML =
+          '<div class="c-main-footer__ad-overlay-inner"><span class="c-main-footer__ad-overlay-label">close ADVERTISEMENT</span></div>';
+        document.body.appendChild(footer);
+        document.body.appendChild(overlay);
+      }, 5450);
     }
     const feed = document.getElementById("fb-feed");
     if (feed) {

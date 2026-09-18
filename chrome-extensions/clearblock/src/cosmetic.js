@@ -261,6 +261,8 @@ fbs-ad, .fbs-ad--top-wrapper, [class*="fbs-ad--"],
     ".featured-posts-banner",
     ".featured-posts-banner-container",
     '[class*="Content_SponsorSlug"]',
+    ".c-main-footer__ad-overlay",
+    ".js-ad-footer",
   ];
 
   const NAG_RE =
@@ -1014,6 +1016,28 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     }
   }
 
+  function hideTacFooterAdOverlay() {
+    if (!enabled) return;
+    let nodes;
+    try {
+      nodes = document.querySelectorAll(".c-main-footer__ad-overlay, .js-ad-footer");
+    } catch {
+      return;
+    }
+    for (const node of nodes) {
+      if (node.querySelector?.("video")?.videoWidth > 0) continue;
+      if (
+        node.matches?.(
+          "footer, .c-main-footer, main, header, nav, #main-content, .homepage, .main-content"
+        )
+      ) {
+        continue;
+      }
+      if (/^(MAIN|SECTION|HEADER|NAV|FOOTER)$/i.test(node.tagName)) continue;
+      hideNode(node, true);
+    }
+  }
+
   function hideVg247SponsoredCards() {
     if (!enabled) return;
     let nodes;
@@ -1300,6 +1324,7 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     hideIgnPromotedItems();
     hideThrillistPartnerCards();
     hideVg247SponsoredCards();
+    hideTacFooterAdOverlay();
     hideSlashdotLeftovers();
     hideDigitalTrendsSponsored();
     hideNatGeoPaidContent();
