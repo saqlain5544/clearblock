@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Clearblock YouTube player lab</title>
+    <style>
+      body { font: 16px/1.5 sans-serif; max-width: 52rem; margin: 2rem auto; padding: 0 1rem; background: #0f0f0f; color: #f1f1f1; }
+      #movie_player { position: relative; background: #000; aspect-ratio: 16/9; overflow: hidden; }
+      #movie_player video { width: 100%; height: 100%; object-fit: cover; }
+      .ytp-ad-player-overlay { position: absolute; inset: 0; background: rgba(180,0,0,0.55); color: #fff; display: flex; align-items: flex-start; justify-content: space-between; padding: 12px; font-weight: 700; }
+      .ytp-ad-skip-button-modern { position: absolute; right: 12px; bottom: 48px; background: #fff; color: #000; border: 0; padding: 8px 14px; }
+      ytd-ad-slot-renderer, #player-ads { background: #c00; color: #fff; padding: 1rem; margin: 1rem 0; }
+      .ok { color: #3ddc97; }
+      .fail { color: #ff6b6b; }
+    </style>
+  </head>
+  <body>
+    <h1>YouTube player lab</h1>
+    <p>
+      Mimics a preroll: the player starts with <code>ad-showing</code>, a red
+      “Ad 1 of 2” overlay, and a skip control. Clearblock should hide every ad
+      surface and jump to content so this looks like Premium — no ad chrome.
+    </p>
+    <div id="movie_player" class="html5-video-player ad-showing">
+      <div class="html5-video-container">
+        <video class="html5-main-video" muted playsinline src="sample.mp4"></video>
+      </div>
+      <div class="ytp-ad-module video-ads">
+        <div class="ytp-ad-player-overlay">Ad 1 of 2 · Visit advertiser</div>
+        <button class="ytp-ad-skip-button-modern" type="button">Skip Ad</button>
+      </div>
+    </div>
+    <div id="player-ads">Companion ad under the player — should never be visible.</div>
+    <ytd-ad-slot-renderer>Sidebar ad slot — should never be visible.</ytd-ad-slot-renderer>
+    <p id="status">waiting…</p>
+    <p id="pruned"></p>
+    <script>
+      window.ytInitialPlayerResponse = {
+        videoDetails: { videoId: "lab", title: "Clearblock lab" },
+        streamingData: { serverAbrStreamingUrl: location.origin + "/test/sample.mp4" },
+        adPlacements: [{ playerAttachedAdPlacementRenderer: { kind: "preroll" } }],
+        adSlots: [{ getMidroll: true }],
+        playerAds: [{ instreamVideoAdRenderer: {} }],
+      };
+      const player = document.getElementById("movie_player");
+      const video = player.querySelector("video");
+      const status = document.getElementById("status");
+      const pruned = document.getElementById("pruned");
+      function overlayVisible() {
+        const overlay = document.querySelector(".ytp-ad-player-overlay");
+        if (!overlay) return false;
+        const s = getComputedStyle(overlay);
+        return s.display !== "none" && s.visibility !== "hidden" && overlay.offsetHeight > 0;
+      }
+      player.querySelector(".ytp-ad-skip-button-modern").addEventListener("click", () => {
+        player.classList.remove("ad-showing");
+        video.currentTime = 0;
+        video.play();
+        status.textContent = "content playing (skip clicked)";
+      });
+      video.addEventListener("ended", () => {
+        if (player.classList.contains("ad-showing")) {
+          player.classList.remove("ad-showing");
+          video.currentTime = 0;
+          video.play();
+          status.textContent = "content playing (ad ended)";
+        }
+      });
+      video.play().catch(() => {});
+      setInterval(() => {
+        const ir = window.ytInitialPlayerResponse || {};
+        const ads =
+          (Array.isArray(ir.adPlacements) && ir.adPlacements.length) ||
+          (Array.isArray(ir.adSlots) && ir.adSlots.length) ||
+          (Array.isArray(ir.playerAds) && ir.playerAds.length);
+        pruned.textContent = ads
+          ? "Player JSON still has ad arrays."
+          : "Player JSON ad arrays are empty (Premium-like).";
+        pruned.className = ads ? "fail" : "ok";
+        if (player.classList.contains("ad-showing") && overlayVisible()) {
+          status.className = "fail";
+          status.textContent = "Ad chrome still visible.";
+        } else if (player.classList.contains("ad-showing")) {
+          status.className = "ok";
+          status.textContent = "Ad-showing but chrome hidden (invisible skip).";
+        } else {
+          status.className = "ok";
+          status.textContent = status.textContent.startsWith("content")
+            ? status.textContent
+            : "content playing, no ad-showing";
+        }
+      }, 200);
+    </script>
+  </body>
+</html>

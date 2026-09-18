@@ -160,6 +160,14 @@
     note(stripObject(window.ytInitialData));
     watchPlayer();
   });
-  const observer = new MutationObserver(watchPlayer);
-  observer.observe(document.documentElement, { childList: true, subtree: true });
+  function observePlayer() {
+    const root = document.documentElement;
+    if (!root) {
+      document.addEventListener("DOMContentLoaded", observePlayer, { once: true });
+      return;
+    }
+    const observer = new MutationObserver(watchPlayer);
+    observer.observe(root, { childList: true, subtree: true });
+  }
+  observePlayer();
 })();

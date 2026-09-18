@@ -107,10 +107,15 @@ ytm-promoted-sparkles-web-renderer,
 
   function injectCss() {
     if (document.getElementById("clearblock-youtube")) return;
+    const root = document.documentElement || document.head;
+    if (!root) {
+      document.addEventListener("DOMContentLoaded", injectCss, { once: true });
+      return;
+    }
     const style = document.createElement("style");
     style.id = "clearblock-youtube";
     style.textContent = HIDE_CSS;
-    (document.documentElement || document.head).appendChild(style);
+    root.appendChild(style);
   }
 
   function adPlayer() {
@@ -176,6 +181,11 @@ ytm-promoted-sparkles-web-renderer,
       heldVideo = video;
     }
     clickSkips(player);
+    if (!player.classList.contains("ad-showing")) {
+      restoreContent();
+      report("skip");
+      return;
+    }
     try {
       video.muted = true;
       if (Number.isFinite(video.duration) && video.duration > 0) {
@@ -196,9 +206,15 @@ ytm-promoted-sparkles-web-renderer,
   }
 
   async function init() {
-    const host = Clearblock.canonicalHost(location.hostname);
-    const state = await Clearblock.readState();
-    enabled = Clearblock.shouldBlock(state, host);
+    try {
+      if (typeof Clearblock !== "undefined") {
+        const host = Clearblock.canonicalHost(location.hostname);
+        const state = await Clearblock.readState();
+        enabled = Clearblock.shouldBlock(state, host);
+      }
+    } catch {
+      enabled = true;
+    }
     document.documentElement?.setAttribute("data-clearblock", enabled ? "on" : "off");
     window.dispatchEvent(new CustomEvent("clearblock:config", { detail: { enabled } }));
     if (!enabled) return;
@@ -207,12 +223,15 @@ ytm-promoted-sparkles-web-renderer,
     setInterval(tick, 50);
     document.addEventListener("yt-navigate-finish", tick);
     document.addEventListener("yt-player-updated", tick);
-    const observer = new MutationObserver(tick);
-    observer.observe(document.documentElement, {
-      subtree: true,
-      attributes: true,
-      attributeFilter: ["class"],
-    });
+    const root = document.documentElement;
+    if (root) {
+      const observer = new MutationObserver(tick);
+      observer.observe(root, {
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["class"],
+      });
+    }
   }
 
   window.addEventListener("message", (event) => {
