@@ -364,6 +364,27 @@
         river.style.cssText = "display:block;width:300px;min-height:72px;margin:12px auto;background:#ddd;";
         document.body.appendChild(river);
       }, 2500);
+      setTimeout(() => {
+        const tile = el("div", {
+          "data-comp": "ProductTile ProductTile BaseComponent",
+          "data-lab-ad": "sephora-sponsored-delayed",
+        });
+        tile.style.cssText = "max-width:297px;margin:12px auto;min-height:72px;background:#fde8f0;";
+        const content = el("div", { class: "ProductTile-content" });
+        content.appendChild(el("span", {}, "Sponsored"));
+        content.appendChild(document.createTextNode(" Delayed Sephora sponsored leftover"));
+        tile.appendChild(content);
+        document.body.appendChild(tile);
+      }, 2600);
+      setTimeout(() => {
+        const li = el("li", {
+          class: "cls-stream-ad yahoo-nebula-dense-native-ad",
+          "data-lab-ad": "yahoo-nebula-delayed",
+        });
+        li.style.cssText = "display:block;max-width:552px;margin:12px auto;min-height:72px;background:#e8eef4;";
+        li.appendChild(el("div", { class: "yahoo-nebula-ad-placeholder-image" }, "Delayed Yahoo nebula native leftover"));
+        document.body.appendChild(li);
+      }, 2700);
     }
     const feed = document.getElementById("fb-feed");
     if (feed) {

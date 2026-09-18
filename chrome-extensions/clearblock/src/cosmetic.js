@@ -72,6 +72,7 @@ iframe[id^="google_ads_iframe"],
 .min-h-\\[250px\\]:has(.optidigital-wrapper-div),
 .min-h-\\[350px\\]:has(.optidigital-wrapper-div),
 [data-testid="sponsored-tag"], [data-sponsored-id],
+.cls-stream-ad, .yahoo-nebula-dense-native-ad, .yahoo-nebula-ad-placeholder-image,
 a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
 .me-stripe-title-subtitle,
 #displayAdCard, #displayAdBanner,
@@ -147,6 +148,9 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     ".min-h-\\[350px\\]:has(.optidigital-wrapper-div)",
     "[data-testid='sponsored-tag']",
     "[data-sponsored-id]",
+    ".cls-stream-ad",
+    ".yahoo-nebula-dense-native-ad",
+    ".yahoo-nebula-ad-placeholder-image",
     "a.me-stripe-tile-button:has(.me-stripe-title-subtitle)",
     ".me-stripe-title-subtitle",
     "#displayAdCard",
@@ -401,12 +405,13 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
   function hideRetailSponsored() {
     if (!enabled) return;
     const nodes = document.querySelectorAll(
-      "[data-test='container-cdui-item-wrapper'], [data-test='text-quill-insert-0'], .attribution-text-l, .s-widget-sponsored-label-text, .puis-sponsored-label-text, [class*='ad-feedback-text'], [class*='adFeedback'], [data-testid='sponsored-tag']"
+      "[data-test='container-cdui-item-wrapper'], [data-test='text-quill-insert-0'], .attribution-text-l, .s-widget-sponsored-label-text, .puis-sponsored-label-text, [class*='ad-feedback-text'], [class*='adFeedback'], [data-testid='sponsored-tag'], .ProductTile-content span, [data-comp*='ProductTile'] span, [data-comp*='ProductTile']"
     );
     for (const node of nodes) {
       const text = (node.innerText || "").replace(/\s+/g, " ").trim();
       if (!/^sponsored\b/i.test(text)) continue;
       const card =
+        node.closest("[data-comp*='ProductTile']") ||
         node.closest("[data-sponsored-id]") ||
         node.closest(".atwb-carousel") ||
         node.closest(".plp-ninja-carousel") ||
