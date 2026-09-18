@@ -385,6 +385,23 @@
         li.appendChild(el("div", { class: "yahoo-nebula-ad-placeholder-image" }, "Delayed Yahoo nebula native leftover"));
         document.body.appendChild(li);
       }, 2700);
+      setTimeout(() => {
+        const rail = el("div", {
+          class: "HomepageLayout_dlRRad__lab m-static-gam",
+          "data-lab-ad": "aol-rightrail-delayed",
+        }, "Delayed AOL right-rail GAM leftover");
+        rail.style.cssText = "width:300px;min-height:72px;margin:12px auto;background:#e1e5ea;";
+        document.body.appendChild(rail);
+      }, 2800);
+      setTimeout(() => {
+        const sticky = el("div", {
+          id: "m-dispatcher-sticky-footer-delayed",
+          class: "m-dispatcher m-dispatcher--sticky-footer",
+          "data-lab-ad": "aol-sticky-delayed",
+        }, "Delayed AOL sticky offer leftover");
+        sticky.style.cssText = "position:fixed;left:0;right:0;bottom:110px;z-index:500;height:72px;background:#bbb;";
+        document.body.appendChild(sticky);
+      }, 2900);
     }
     const feed = document.getElementById("fb-feed");
     if (feed) {
