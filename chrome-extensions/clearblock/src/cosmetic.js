@@ -98,6 +98,10 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
 [data-ad-unit="leader_middle"], [data-ad="leader-middle"],
 [data-pogo], [data-pogo="main"], [data-pogo="footer"], [data-pogo="top"], [data-pogo="sidebar"],
 .begenuin-widget, .gen-sdk-class, [id^="gen-sdk"], [data-genuin-host],
+a.zd-featured-deals__card[data-zd-track-item-name^="Sponsored:"],
+a.zd-featured-deals__card[data-zd-track-item-name^="sponsored:"],
+.zd-featured-deals__card-wrapper:has([data-zd-track-item-name^="Sponsored:"]),
+.zd-featured-deals__card-wrapper:has([data-zd-track-item-name^="sponsored:"]),
 [data-lab-ad] {
   display: none !important;
 }
@@ -231,6 +235,10 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     ".gen-sdk-class",
     '[id^="gen-sdk"]',
     "[data-genuin-host]",
+    'a.zd-featured-deals__card[data-zd-track-item-name^="Sponsored:"]',
+    'a.zd-featured-deals__card[data-zd-track-item-name^="sponsored:"]',
+    '.zd-featured-deals__card-wrapper:has([data-zd-track-item-name^="Sponsored:"])',
+    '.zd-featured-deals__card-wrapper:has([data-zd-track-item-name^="sponsored:"])',
   ];
 
   const NAG_RE =
@@ -640,6 +648,43 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     }
   }
 
+  function isCNetSponsoredDeal(node) {
+    if (!node || node.nodeType !== 1) return false;
+    const name = (node.getAttribute?.("data-zd-track-item-name") || "").trim();
+    if (/^sponsored\s*:/i.test(name)) return true;
+    const title = (node.querySelector?.(".zd-featured-deals__card-title")?.innerText || "").replace(/\s+/g, " ").trim();
+    if (/^sponsored\s*:/i.test(title)) return true;
+    if (node.matches?.(".zd-featured-deals__card-title") && /^sponsored\s*:/i.test((node.innerText || "").replace(/\s+/g, " ").trim())) {
+      return true;
+    }
+    return false;
+  }
+
+  function hideCNetSponsoredDeals() {
+    if (!enabled) return;
+    let nodes;
+    try {
+      nodes = document.querySelectorAll(
+        "a.zd-featured-deals__card, .zd-featured-deals__card, .zd-featured-deals__card-title"
+      );
+    } catch {
+      return;
+    }
+    for (const node of nodes) {
+      if (!isCNetSponsoredDeal(node)) continue;
+      const card =
+        node.closest?.("a.zd-featured-deals__card") ||
+        node.closest?.(".zd-featured-deals__card") ||
+        node;
+      if (card.querySelector?.("video")?.videoWidth > 0) continue;
+      hideNode(card, true);
+      const wrap = card.closest?.(".zd-featured-deals__card-wrapper");
+      if (wrap && wrap !== card && !(wrap.querySelector?.("video")?.videoWidth > 0)) {
+        hideNode(wrap, true);
+      }
+    }
+  }
+
   function hideBloombergAdSlots() {
     if (!enabled) return;
     let nodes;
@@ -743,6 +788,7 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     hideBareAdLabels();
     hidePogoSlots();
     hideBegeninSlots();
+    hideCNetSponsoredDeals();
     hideBloombergAdSlots();
     hideSportsAdSlots();
     hideOptidigitalSlots();

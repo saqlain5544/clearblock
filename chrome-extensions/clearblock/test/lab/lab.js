@@ -474,6 +474,21 @@
         wrap.appendChild(widget);
         document.body.appendChild(wrap);
       }, 3600);
+      setTimeout(() => {
+        const wrap = el("div", { class: "zd-featured-deals__card-wrapper" });
+        const card = el("a", {
+          class: "zd-featured-deals__card",
+          "data-lab-ad": "cnet-sponsored-deal-delayed",
+          "data-zd-track-item-name": "Sponsored: Switch to Metro by T-Mobile and Get an iPhone 16E",
+          rel: "noopener nofollow sponsored",
+        });
+        const title = el("span", { class: "zd-featured-deals__card-title" });
+        title.textContent = "Sponsored: Switch to Metro by T-Mobile and Get an iPhone 16E";
+        card.appendChild(title);
+        card.style.cssText = "display:block;width:200px;min-height:72px;margin:12px auto;background:#eee;padding:8px;";
+        wrap.appendChild(card);
+        document.body.appendChild(wrap);
+      }, 3700);
     }
     const feed = document.getElementById("fb-feed");
     if (feed) {
