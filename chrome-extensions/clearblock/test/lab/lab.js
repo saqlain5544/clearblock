@@ -866,6 +866,21 @@
         list.appendChild(sponsored);
         document.body.appendChild(list);
       }, 5600);
+      setTimeout(() => {
+        const list = el("div", { class: "col-inner vertical-card-list", "data-lab-content": "fos-grid-delayed" });
+        list.style.cssText = "max-width:1200px;margin:12px auto;background:#fff;color:#111;padding:8px;display:flex;gap:12px;";
+        const organic = el("div", { class: "cardv2-wrapper", "data-lab-content": "fos-editorial-delayed" });
+        organic.textContent = "FOS Tonight delayed house programming";
+        const sponsored = el("div", {
+          class: "cardv2-wrapper cardv2-wrapper--sponsored",
+          "data-lab-ad": "fos-sponsored-delayed",
+        });
+        sponsored.style.cssText = "min-height:72px;background:#eee;padding:8px;";
+        sponsored.textContent = "SPONSORED Delayed Drew Weatherford leftover";
+        list.appendChild(organic);
+        list.appendChild(sponsored);
+        document.body.appendChild(list);
+      }, 5650);
     }
     const feed = document.getElementById("fb-feed");
     if (feed) {

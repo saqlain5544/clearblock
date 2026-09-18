@@ -111,6 +111,7 @@ fbs-ad, .fbs-ad--top-wrapper, [class*="fbs-ad--"],
 .featured-posts-banner, .featured-posts-banner-container,
 [class*="Content_SponsorSlug"],
 [class*="card--sponsored"],
+[class*="wrapper--sponsored"],
 [class*="listing__text--sponsored"],
 [class*="sponsorship-disclaimer"],
 [class*="promoted-item"],
@@ -121,6 +122,7 @@ fbs-ad, .fbs-ad--top-wrapper, [class*="fbs-ad--"],
 [class*="right-rail-item__sponsor"],
 li:has(> [class*="card--sponsored"]),
 li:has(> a[class*="card--sponsored"]),
+li:has(> [class*="wrapper--sponsored"]),
 li:has([class*="listing__text--sponsored"]),
 li:has([class*="sponsorship-disclaimer"]),
 li:has([class*="promoted-item"]),
@@ -284,6 +286,7 @@ li:has([class*="promoted-item"]),
     ".js-ad-footer",
     "[class*='ad-overlay']",
     "[class*='card--sponsored']",
+    "[class*='wrapper--sponsored']",
     "[class*='listing__text--sponsored']",
     "[class*='sponsorship-disclaimer']",
     "[class*='promoted-item']",
@@ -294,6 +297,7 @@ li:has([class*="promoted-item"]),
     "[class*='right-rail-item__sponsor']",
     "li:has(> [class*='card--sponsored'])",
     "li:has(> a[class*='card--sponsored'])",
+    "li:has(> [class*='wrapper--sponsored'])",
     "li:has([class*='listing__text--sponsored'])",
     "li:has([class*='sponsorship-disclaimer'])",
     "li:has([class*='promoted-item'])",
@@ -861,7 +865,7 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
       if (isListingGrid(el)) return found;
       const cls = typeof el.className === "string" ? el.className : el.getAttribute?.("class") || "";
       const tagged =
-        /card--sponsored|sponsored-post|promoted-item|UCCContainer|wdn-listv2-item|card-list__item|mntl-carousel__item|beauty-card|mntl-card|content-item|zd-featured-deals__card|b-right-rail-item|b-aside__item|CarouselSlide|RegularStandardPrismTile|HomepagePromos__promo|ListItemWrapper|fhitem|identifier--branded|ntv-sponsored|ntv_link/i.test(
+        /card--sponsored|wrapper--sponsored|sponsored-post|promoted-item|UCCContainer|wdn-listv2-item|card-list__item|mntl-carousel__item|beauty-card|mntl-card|content-item|zd-featured-deals__card|b-right-rail-item|b-aside__item|CarouselSlide|RegularStandardPrismTile|HomepagePromos__promo|ListItemWrapper|fhitem|identifier--branded|ntv-sponsored|ntv_link/i.test(
           cls
         );
       const item = /^(LI|ARTICLE)$/i.test(el.tagName) || (el.tagName === "A" && /card/i.test(cls));
@@ -877,7 +881,7 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     let classHits;
     try {
       classHits = document.querySelectorAll(
-        "[class*='card--sponsored'], [class*='listing__text--sponsored'], [class*='sponsorship-disclaimer'], [class*='sponsored-post'], [class*='promoted-item'], .sponsor-disclosure, [class*='SponsorSlug'], [class*='identifier--branded'], [class*='ntv-sponsored'], [class*='ntv_link'], [class*='b-sponsor'], [class*='aside__sponsor'], [class*='right-rail-item__sponsor'], [data-zd-track-item-name^='Sponsored'], [data-zd-track-item-name^='sponsored'], [class*='hha-sponsored']"
+        "[class*='card--sponsored'], [class*='wrapper--sponsored'], [class*='listing__text--sponsored'], [class*='sponsorship-disclaimer'], [class*='sponsored-post'], [class*='promoted-item'], .sponsor-disclosure, [class*='SponsorSlug'], [class*='identifier--branded'], [class*='ntv-sponsored'], [class*='ntv_link'], [class*='b-sponsor'], [class*='aside__sponsor'], [class*='right-rail-item__sponsor'], [data-zd-track-item-name^='Sponsored'], [data-zd-track-item-name^='sponsored'], [class*='hha-sponsored']"
       );
     } catch {
       classHits = [];
