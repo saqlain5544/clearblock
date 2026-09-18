@@ -959,6 +959,31 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     }
   }
 
+  function hideIgnPromotedItems() {
+    if (!enabled) return;
+    let nodes;
+    try {
+      nodes = document.querySelectorAll(".sponsor-disclosure, .promoted-item, [class*='promoted-item']");
+    } catch {
+      return;
+    }
+    for (const node of nodes) {
+      if (node.querySelector?.("video")?.videoWidth > 0) continue;
+      const cls = typeof node.className === "string" ? node.className : node.getAttribute?.("class") || "";
+      const isCard = /\bpromoted-item\b/.test(cls);
+      if (!isCard) {
+        const text = (node.innerText || "").replace(/\s+/g, " ").trim();
+        if (!node.classList?.contains("sponsor-disclosure") && !/^promoted$/i.test(text)) continue;
+      }
+      const card = isCard ? node : node.closest("[class*='promoted-item'], .content-item");
+      if (!card || card === document.body) continue;
+      if (card.matches?.("section.main-content, .content-feed-grid, .content-feed-grid-wrapper, .homepage-grid, main, header, nav, footer, #main-content")) continue;
+      if (/^(MAIN|SECTION|HEADER|NAV|FOOTER)$/i.test(card.tagName)) continue;
+      if (card.querySelector?.("video")?.videoWidth > 0) continue;
+      hideNode(card, true);
+    }
+  }
+
   function hideSlashdotLeftovers() {
     if (!enabled) return;
     let stickies;
@@ -1215,6 +1240,7 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     hideAthleticSponsorSlugs();
     hideNineToFiveLeftovers();
     hideVentureBeatPartnerCards();
+    hideIgnPromotedItems();
     hideSlashdotLeftovers();
     hideDigitalTrendsSponsored();
     hideNatGeoPaidContent();

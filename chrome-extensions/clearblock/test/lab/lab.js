@@ -759,6 +759,24 @@
         river.appendChild(sponsored);
         document.body.appendChild(river);
       }, 5250);
+      setTimeout(() => {
+        const feed = el("section", { class: "main-content", "data-lab-content": "ign-feed-delayed" });
+        feed.style.cssText = "max-width:661px;margin:12px auto;background:#fff;color:#111;padding:8px;";
+        const organic = el("div", { class: "content-item", "data-lab-content": "ign-editorial-delayed" });
+        organic.textContent = "The Weight Review Ethan Hawke puts the pedal to the metal";
+        const promoted = el("div", {
+          class: "content-item promoted-item",
+          "data-lab-ad": "ign-promoted-delayed",
+        });
+        promoted.appendChild(document.createTextNode("RAVEN2 - ZERO Lets Players Enter an Apocalyptic MMORPG "));
+        const btn = el("button", { class: "sponsor-disclosure" });
+        btn.textContent = "PROMOTED";
+        promoted.appendChild(btn);
+        promoted.style.cssText = "min-height:72px;background:#eee;padding:8px;";
+        feed.appendChild(organic);
+        feed.appendChild(promoted);
+        document.body.appendChild(feed);
+      }, 5300);
     }
     const feed = document.getElementById("fb-feed");
     if (feed) {
