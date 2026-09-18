@@ -614,6 +614,34 @@
         ul.appendChild(sponsored);
         document.body.appendChild(ul);
       }, 4700);
+      setTimeout(() => {
+        const list = el("div", { id: "firehoselist-delayed", class: "fhroot", "data-lab-content": "slashdot-firehose-delayed" });
+        const organicStory = el("article", { class: "fhitem fhitem-story", "data-lab-content": "slashdot-editorial-delayed" });
+        organicStory.textContent = "Journalist Calls Out Collective Amnesia of Schools Romance With Big Tech";
+        organicStory.style.cssText = "max-width:1037px;margin:12px auto;background:#fff;color:#111;padding:8px;";
+        const sponsoredStory = el("article", {
+          class: "fhitem fhitem-story article-nel-20469",
+          "data-lab-ad": "slashdot-sponsored-delayed",
+        });
+        const disc = el("div", { class: "ntv-sponsored-disclaimer" });
+        disc.textContent = "Sponsored Content";
+        sponsoredStory.appendChild(disc);
+        sponsoredStory.appendChild(document.createTextNode(" Compare the top business software of 2026"));
+        sponsoredStory.style.cssText = "max-width:1037px;min-height:72px;margin:12px auto;background:#5c4a32;color:#fff;padding:8px;";
+        list.appendChild(organicStory);
+        list.appendChild(sponsoredStory);
+        document.body.appendChild(list);
+      }, 4800);
+      setTimeout(() => {
+        const sticky = el("section", {
+          id: "auth0-slas-delayed",
+          "data-footer-name": "mdb",
+          "data-lab-ad": "slashdot-mongo-sticky-delayed",
+        });
+        sticky.textContent = "Gen AI apps are built with MongoDB Atlas Try Free";
+        sticky.style.cssText = "display:block;min-height:90px;margin:12px auto;background:#0b2b26;color:#fff;padding:8px;";
+        document.body.appendChild(sticky);
+      }, 4900);
     }
     const feed = document.getElementById("fb-feed");
     if (feed) {
