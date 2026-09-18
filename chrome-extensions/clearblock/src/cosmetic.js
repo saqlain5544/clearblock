@@ -87,8 +87,8 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
 .item--topic-placeholder,
 [data-testid="ad-unit"], [data-component="ad-slot"], .dotcom-ad, #dotcom-top,
 [data-component="leaderboard-ad"], [data-component="box-ad"], [data-component="immersive-ad"],
-[class*="media-ui-BaseAd_"], [class*="media-ui-LeaderboardAd_"], [class*="media-ui-BoxAd_"],
-[class*="media-ui-ImmersiveAd_"], [class*="media-ui-FullWidthAd_"],
+[class*="media-ui-BaseAd_"], [class*="media-ui-BoxAd_"],
+[class*="media-ui-ImmersiveAd_"], [class*="media-ui-FullWidthAd_fullWidthAd"],
 [class*="BaseAd_adPlaceholder"],
 [role="region"][aria-label="Advertisement"],
 [role="region"][aria-label*="advertisement" i],
@@ -197,10 +197,9 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     '[data-component="box-ad"]',
     '[data-component="immersive-ad"]',
     '[class*="media-ui-BaseAd_"]',
-    '[class*="media-ui-LeaderboardAd_"]',
     '[class*="media-ui-BoxAd_"]',
     '[class*="media-ui-ImmersiveAd_"]',
-    '[class*="media-ui-FullWidthAd_"]',
+    '[class*="media-ui-FullWidthAd_fullWidthAd"]',
     '[class*="BaseAd_adPlaceholder"]',
     '[role="region"][aria-label="Advertisement"]',
     '[role="region"][aria-label*="advertisement" i]',
@@ -547,7 +546,8 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
         if (parent.querySelector?.("video, audio, #movie_player")) break;
         const ptext = (parent.textContent || "").replace(/\s+/g, " ").trim();
         const cls = typeof parent.className === "string" ? parent.className : parent.getAttribute?.("class") || "";
-        const wrapper = /media-ui-(?:BaseAd|LeaderboardAd|BoxAd|ImmersiveAd|FullWidthAd)_|adPlaceholder/i.test(cls);
+        const wrapper = /media-ui-(?:BaseAd|BoxAd|ImmersiveAd|FullWidthAd_fullWidthAd)|adPlaceholder/i.test(cls);
+        if (ptext.length > 200) break;
         if (ptext && !isAdvertisementLabelText(ptext) && !wrapper) break;
         if (!ptext && !wrapper) break;
         hideNode(parent, true);
@@ -561,7 +561,7 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     let nodes;
     try {
       nodes = document.querySelectorAll(
-        '[data-component="leaderboard-ad"], [data-component="box-ad"], [data-component="immersive-ad"], [class*="media-ui-BaseAd_"], [class*="media-ui-LeaderboardAd_"], [class*="media-ui-BoxAd_"], [class*="media-ui-ImmersiveAd_"], [class*="media-ui-FullWidthAd_"]'
+        '[data-component="leaderboard-ad"], [data-component="box-ad"], [data-component="immersive-ad"], [class*="media-ui-BaseAd_"], [class*="media-ui-BoxAd_"], [class*="media-ui-ImmersiveAd_"], [class*="media-ui-FullWidthAd_fullWidthAd"]'
       );
     } catch {
       return;
@@ -578,7 +578,8 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
         const ptext = (parent.innerText || "").replace(/\s+/g, " ").trim();
         if (/we.?ve updated our terms/i.test(ptext)) break;
         const cls = typeof parent.className === "string" ? parent.className : parent.getAttribute?.("class") || "";
-        const wrapper = /media-ui-(?:BaseAd|LeaderboardAd|BoxAd|ImmersiveAd|FullWidthAd)_/i.test(cls);
+        const wrapper = /media-ui-(?:BaseAd|BoxAd|ImmersiveAd|FullWidthAd_fullWidthAd)/i.test(cls);
+        if (ptext.length > 200) break;
         if (!wrapper && ptext && ptext.length > 40) break;
         if (!wrapper && ptext) break;
         hideNode(parent, true);
