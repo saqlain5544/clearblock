@@ -251,6 +251,9 @@ YOUTUBE_AND_CORE = [
     "||ad.dailymotion.com^",
     "||ads.dailymotion.com^",
     "||smilewanted.com^",
+    "||fishingrodsgalore.com^",
+    "||bounceexchange.com^",
+    "||getadmiral.com^",
 ]
 
 KEYWORD_RE = re.compile(

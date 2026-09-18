@@ -52,7 +52,11 @@ iframe[id^="google_ads_iframe"],
 [id*="adblock-wall"], [class*="disable-adblock"], .anti-adblock, .antiadblock,
 [data-anti-adblock], .adblock-msg, .adblocker-msg, .ad-block-msg,
 #blockadblock, .blockadblock, .fuckadblock, .adsbox-clone,
-.spon-qp, [class*="sponsored-quick"], .sponsored-quick-post,
+.spon-qp, [class*="sponsored-quick"], .sponsored-quick-post, .sponsored-quickpost,
+[class*="sponsored-quickpost"],
+.m-ad, .m-ad__dynamic_ad_unit, [class*="m-ad__dynamic"], [class*="m-ad__desktop"],
+[class*="m-ad__medium_rectangle"], [class*="m-ad__sponsored"],
+[class*="duet--ad-container"],
 [class*="admiral"], .admiral-unit,
 [data-lab-ad] {
   display: none !important;
@@ -93,6 +97,15 @@ iframe[id^="google_ads_iframe"],
     ".dfp_ad--held-area",
     ".spon-qp",
     "[class*='sponsored-quick']",
+    ".sponsored-quickpost",
+    "[class*='sponsored-quickpost']",
+    ".m-ad",
+    ".m-ad__dynamic_ad_unit",
+    "[class*='m-ad__dynamic']",
+    "[class*='m-ad__desktop']",
+    "[class*='m-ad__medium_rectangle']",
+    "[class*='m-ad__sponsored']",
+    "[class*='duet--ad-container']",
     "[class*='admiral']",
     ".admiral-unit",
   ];
@@ -234,10 +247,43 @@ iframe[id^="google_ads_iframe"],
     }
   }
 
+  function hidePublisherAdChrome() {
+    if (!enabled) return;
+    let nodes;
+    try {
+      nodes = document.querySelectorAll("*");
+    } catch {
+      return;
+    }
+    for (const node of nodes) {
+      if (node.nodeType !== 1) continue;
+      const cls = typeof node.className === "string" ? node.className : node.getAttribute?.("class") || "";
+      if (!cls) continue;
+      if (/(?:^|\s)(?:m-ad__|duet--ad-container)/.test(cls) || /(?:^|\s)m-ad(?:\s|$)/.test(cls)) {
+        hideNode(node, true);
+      }
+    }
+  }
+
+  function hideAdvertisingContentCards() {
+    if (!enabled) return;
+    const nodes = document.querySelectorAll("div, article, aside, section");
+    for (const node of nodes) {
+      const raw = node.textContent;
+      if (!raw || raw.length > 1600) continue;
+      if (!/advertising content from/i.test(raw)) continue;
+      const text = raw.replace(/\s+/g, " ").trim();
+      if (!/\badvertising content from\b/i.test(text.slice(0, 120))) continue;
+      hideNode(node, true);
+    }
+  }
+
   function sweep() {
     hideMatches(EXTRA_HIDE, true);
     hideMatches(specificSelectors, false);
     hideRetailSponsored();
+    hidePublisherAdChrome();
+    hideAdvertisingContentCards();
     dismissNags();
   }
 

@@ -57,6 +57,8 @@
     "https://ad.dailymotion.com/js/ads.js",
     "https://csync.smilewanted.com/",
     "https://fundingchoicesmessages.google.com/i/lab.js",
+    "https://fishingrodsgalore.com/pixel.gif",
+    "https://bounceexchange.com/tag.js",
   ];
 
   function isVisible(el) {
@@ -311,6 +313,8 @@
       setTimeout(() => {
         const gpt = document.getElementById("div-gpt-ad-desktop_hero");
         if (gpt) gpt.style.setProperty("display", "block", "important");
+        const chrome = document.getElementById("verge-ad-label-chrome");
+        if (chrome) chrome.style.setProperty("display", "block", "important");
       }, 1400);
     }
     const feed = document.getElementById("fb-feed");
