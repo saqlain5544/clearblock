@@ -430,6 +430,17 @@
         bbc.appendChild(el("div", { id: "dotcom-top-delayed", class: "dotcom-ad" }, "Delayed BBC leftover masthead"));
         document.body.appendChild(bbc);
       }, 3200);
+      setTimeout(() => {
+        const bb = el("div", {
+          "data-component": "leaderboard-ad",
+          class: "media-ui-BaseAd_baseAd-lab media-ui-LeaderboardAd_leaderboard-lab",
+          "data-lab-ad": "bloomberg-leaderboard-delayed",
+          role: "region",
+          "aria-label": "Leaderboard advertisement",
+        });
+        bb.style.cssText = "width:100%;min-height:80px;margin:12px auto;background:#2b2b2b;";
+        document.body.appendChild(bb);
+      }, 3300);
     }
     const feed = document.getElementById("fb-feed");
     if (feed) {

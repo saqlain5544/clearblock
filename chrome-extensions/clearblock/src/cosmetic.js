@@ -86,6 +86,12 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
 .header-highlighted-area__container:has(a[href*="sponsor-content"]),
 .item--topic-placeholder,
 [data-testid="ad-unit"], [data-component="ad-slot"], .dotcom-ad, #dotcom-top,
+[data-component="leaderboard-ad"], [data-component="box-ad"], [data-component="immersive-ad"],
+[class*="media-ui-BaseAd_"], [class*="media-ui-LeaderboardAd_"], [class*="media-ui-BoxAd_"],
+[class*="media-ui-ImmersiveAd_"], [class*="media-ui-FullWidthAd_"],
+[class*="BaseAd_adPlaceholder"],
+[role="region"][aria-label="Advertisement"],
+[role="region"][aria-label*="advertisement" i],
 [data-lab-ad] {
   display: none !important;
 }
@@ -187,6 +193,17 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     "[data-component='ad-slot']",
     ".dotcom-ad",
     "#dotcom-top",
+    '[data-component="leaderboard-ad"]',
+    '[data-component="box-ad"]',
+    '[data-component="immersive-ad"]',
+    '[class*="media-ui-BaseAd_"]',
+    '[class*="media-ui-LeaderboardAd_"]',
+    '[class*="media-ui-BoxAd_"]',
+    '[class*="media-ui-ImmersiveAd_"]',
+    '[class*="media-ui-FullWidthAd_"]',
+    '[class*="BaseAd_adPlaceholder"]',
+    '[role="region"][aria-label="Advertisement"]',
+    '[role="region"][aria-label*="advertisement" i]',
   ];
 
   const NAG_RE =
@@ -499,17 +516,71 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     }
   }
 
+  function isAdvertisementLabelText(value) {
+    const text = String(value || "")
+      .replace(/["']/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    return /^(advertisement|advertisements)$/i.test(text);
+  }
+
   function hideBareAdLabels() {
     if (!enabled) return;
-    const nodes = document.querySelectorAll("span, div, small, p, aside, figcaption");
+    const nodes = document.querySelectorAll("span, div, small, p, aside, figcaption, section");
     for (const node of nodes) {
       const text = (node.textContent || "").replace(/\s+/g, " ").trim();
-      if (!/^(advertisement|advertisements)$/i.test(text)) continue;
+      let pseudo = "";
+      if (!text) {
+        try {
+          const before = getComputedStyle(node, "::before").content || "";
+          const after = getComputedStyle(node, "::after").content || "";
+          pseudo = `${before} ${after}`.replace(/["']/g, "").replace(/\s+/g, " ").trim();
+        } catch {
+          pseudo = "";
+        }
+      }
+      if (!isAdvertisementLabelText(text) && !isAdvertisementLabelText(pseudo)) continue;
+      if (node.querySelector?.("video, audio, #movie_player")) continue;
       hideNode(node, true);
       let parent = node.parentElement;
       for (let i = 0; i < 4 && parent && parent !== document.body; i += 1) {
+        if (parent.querySelector?.("video, audio, #movie_player")) break;
         const ptext = (parent.textContent || "").replace(/\s+/g, " ").trim();
-        if (!/^(advertisement|advertisements)(\s+(advertisement|advertisements))*$/i.test(ptext)) break;
+        const cls = typeof parent.className === "string" ? parent.className : parent.getAttribute?.("class") || "";
+        const wrapper = /media-ui-(?:BaseAd|LeaderboardAd|BoxAd|ImmersiveAd|FullWidthAd)_|adPlaceholder/i.test(cls);
+        if (ptext && !isAdvertisementLabelText(ptext) && !wrapper) break;
+        if (!ptext && !wrapper) break;
+        hideNode(parent, true);
+        parent = parent.parentElement;
+      }
+    }
+  }
+
+  function hideBloombergAdSlots() {
+    if (!enabled) return;
+    let nodes;
+    try {
+      nodes = document.querySelectorAll(
+        '[data-component="leaderboard-ad"], [data-component="box-ad"], [data-component="immersive-ad"], [class*="media-ui-BaseAd_"], [class*="media-ui-LeaderboardAd_"], [class*="media-ui-BoxAd_"], [class*="media-ui-ImmersiveAd_"], [class*="media-ui-FullWidthAd_"]'
+      );
+    } catch {
+      return;
+    }
+    for (const node of nodes) {
+      const video = node.querySelector?.("video");
+      if (video && video.videoWidth > 0) continue;
+      const text = (node.innerText || "").replace(/\s+/g, " ").trim();
+      if (text.length > 80 && /we.?ve updated our terms|terms of service/i.test(text)) continue;
+      hideNode(node, true);
+      let parent = node.parentElement;
+      for (let i = 0; i < 3 && parent && parent !== document.body; i += 1) {
+        if (parent.querySelector?.("video, audio, #movie_player")) break;
+        const ptext = (parent.innerText || "").replace(/\s+/g, " ").trim();
+        if (/we.?ve updated our terms/i.test(ptext)) break;
+        const cls = typeof parent.className === "string" ? parent.className : parent.getAttribute?.("class") || "";
+        const wrapper = /media-ui-(?:BaseAd|LeaderboardAd|BoxAd|ImmersiveAd|FullWidthAd)_/i.test(cls);
+        if (!wrapper && ptext && ptext.length > 40) break;
+        if (!wrapper && ptext) break;
         hideNode(parent, true);
         parent = parent.parentElement;
       }
@@ -561,6 +632,7 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     hidePublisherAdChrome();
     hideAdvertisingContentCards();
     hideBareAdLabels();
+    hideBloombergAdSlots();
     hideOptidigitalSlots();
     hideMsnNativeAds();
     hideAolLeftovers();
