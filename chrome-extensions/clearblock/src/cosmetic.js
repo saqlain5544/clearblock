@@ -278,12 +278,31 @@ iframe[id^="google_ads_iframe"],
     }
   }
 
+  function hideBareAdLabels() {
+    if (!enabled) return;
+    const nodes = document.querySelectorAll("span, div, small, p, aside, figcaption");
+    for (const node of nodes) {
+      const text = (node.textContent || "").replace(/\s+/g, " ").trim();
+      if (!/^(advertisement|advertisements)$/i.test(text)) continue;
+      hideNode(node, true);
+      let parent = node.parentElement;
+      for (let i = 0; i < 4 && parent && parent !== document.body; i += 1) {
+        const ptext = (parent.textContent || "").replace(/\s+/g, " ").trim();
+        if (!/^(advertisement|advertisements)(\s+(advertisement|advertisements))*$/i.test(ptext)) break;
+        hideNode(parent, true);
+        parent = parent.parentElement;
+      }
+    }
+  }
+
   function sweep() {
+    document.documentElement?.setAttribute("data-clearblock", enabled ? "on" : "off");
     hideMatches(EXTRA_HIDE, true);
     hideMatches(specificSelectors, false);
     hideRetailSponsored();
     hidePublisherAdChrome();
     hideAdvertisingContentCards();
+    hideBareAdLabels();
     dismissNags();
   }
 
