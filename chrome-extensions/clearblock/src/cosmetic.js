@@ -66,6 +66,8 @@ iframe[id^="google_ads_iframe"],
 [class*="m-ad__medium_rectangle"], [class*="m-ad__sponsored"],
 [class*="duet--ad-container"],
 [class*="admiral"], .admiral-unit,
+[data-optidigital-slot], [id^="optidigital-adslot-"], .optidigital-wrapper-div,
+[data-testid="sponsored-tag"], [data-sponsored-id],
 [data-lab-ad] {
   display: none !important;
 }
@@ -126,6 +128,11 @@ iframe[id^="google_ads_iframe"],
     "[class*='duet--ad-container']",
     "[class*='admiral']",
     ".admiral-unit",
+    "[data-optidigital-slot]",
+    "[id^='optidigital-adslot-']",
+    ".optidigital-wrapper-div",
+    "[data-testid='sponsored-tag']",
+    "[data-sponsored-id]",
   ];
 
   const NAG_RE =
@@ -252,12 +259,13 @@ iframe[id^="google_ads_iframe"],
   function hideRetailSponsored() {
     if (!enabled) return;
     const nodes = document.querySelectorAll(
-      "[data-test='container-cdui-item-wrapper'], [data-test='text-quill-insert-0'], .attribution-text-l, .s-widget-sponsored-label-text, .puis-sponsored-label-text, [class*='ad-feedback-text'], [class*='adFeedback']"
+      "[data-test='container-cdui-item-wrapper'], [data-test='text-quill-insert-0'], .attribution-text-l, .s-widget-sponsored-label-text, .puis-sponsored-label-text, [class*='ad-feedback-text'], [class*='adFeedback'], [data-testid='sponsored-tag']"
     );
     for (const node of nodes) {
       const text = (node.innerText || "").replace(/\s+/g, " ").trim();
       if (!/^sponsored\b/i.test(text)) continue;
       const card =
+        node.closest("[data-sponsored-id]") ||
         node.closest(".atwb-carousel") ||
         node.closest(".plp-ninja-carousel") ||
         node.closest(".sbb-carousel-l") ||
@@ -321,6 +329,30 @@ iframe[id^="google_ads_iframe"],
     }
   }
 
+  function hideOptidigitalSlots() {
+    if (!enabled) return;
+    const nodes = document.querySelectorAll(
+      "[data-optidigital-slot], [id^='optidigital-adslot-'], .optidigital-wrapper-div"
+    );
+    for (const node of nodes) {
+      if (node.tagName === "SCRIPT" || node.tagName === "STYLE") continue;
+      hideNode(node, true);
+      const parent = node.parentElement;
+      if (!parent || parent === document.body || parent.id === "app" || parent.id === "main") continue;
+      if (parent.querySelector?.("video, audio, #movie_player")) continue;
+      const text = (parent.innerText || "").replace(/\s+/g, " ").trim();
+      let before = "";
+      try {
+        before = parent.ownerDocument.defaultView.getComputedStyle(parent, "::before").content || "";
+      } catch {
+        before = "";
+      }
+      if (!text || /^(advertisement|advertisements)$/i.test(text) || /advertisement/i.test(before)) {
+        hideNode(parent, true);
+      }
+    }
+  }
+
   function sweep() {
     document.documentElement?.setAttribute("data-clearblock", enabled ? "on" : "off");
     hideMatches(EXTRA_HIDE, true);
@@ -329,6 +361,7 @@ iframe[id^="google_ads_iframe"],
     hidePublisherAdChrome();
     hideAdvertisingContentCards();
     hideBareAdLabels();
+    hideOptidigitalSlots();
     dismissNags();
   }
 

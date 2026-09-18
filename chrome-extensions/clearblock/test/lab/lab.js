@@ -343,6 +343,19 @@
         imgur.style.cssText = "position:fixed;inset:20% 24%;z-index:2147483646;background:#111;color:#fff;padding:16px;text-align:center;";
         document.body.appendChild(imgur);
       }, 2200);
+      setTimeout(() => {
+        const wrap = el("div", { class: "min-h-[250px]", "data-lab-ad": "gizmodo-optidigital-delayed" });
+        wrap.style.cssText = "min-height:250px;display:flex;align-items:center;justify-content:center;background:#eee;color:#888;";
+        const slot = el("div", { class: "optidigital-wrapper-div", "data-optidigital-slot": "true" }, "ADVERTISEMENT");
+        wrap.appendChild(slot);
+        document.body.appendChild(wrap);
+      }, 2300);
+      setTimeout(() => {
+        const card = el("div", { "data-sponsored-id": "lab-wayfair-delayed", "data-lab-ad": "wayfair-sponsored-delayed" });
+        card.style.cssText = "max-width:297px;margin:12px auto;min-height:72px;background:#f3e8ff;";
+        card.appendChild(el("div", { "data-testid": "sponsored-tag" }, "Sponsored"));
+        document.body.appendChild(card);
+      }, 2400);
     }
     const feed = document.getElementById("fb-feed");
     if (feed) {
