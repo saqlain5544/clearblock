@@ -1014,6 +1014,33 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     }
   }
 
+  function hideVg247SponsoredCards() {
+    if (!enabled) return;
+    let nodes;
+    try {
+      nodes = document.querySelectorAll("span.kicker, .kicker_wrapper .kicker");
+    } catch {
+      return;
+    }
+    for (const node of nodes) {
+      if (node.querySelector?.("video")?.videoWidth > 0) continue;
+      const text = (node.innerText || "").replace(/\s+/g, " ").trim();
+      if (!/^sponsored$/i.test(text) || text.length > 24) continue;
+      const card = node.closest("li");
+      if (!card || card === document.body) continue;
+      if (
+        card.matches?.(
+          "ul.primary, ul, ol, main, header, nav, footer, #main-content, .homepage, .listing"
+        )
+      ) {
+        continue;
+      }
+      if (/^(MAIN|SECTION|HEADER|NAV|FOOTER|UL|OL)$/i.test(card.tagName)) continue;
+      if (card.querySelector?.("video")?.videoWidth > 0) continue;
+      hideNode(card, true);
+    }
+  }
+
   function hideSlashdotLeftovers() {
     if (!enabled) return;
     let stickies;
@@ -1272,6 +1299,7 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     hideVentureBeatPartnerCards();
     hideIgnPromotedItems();
     hideThrillistPartnerCards();
+    hideVg247SponsoredCards();
     hideSlashdotLeftovers();
     hideDigitalTrendsSponsored();
     hideNatGeoPaidContent();

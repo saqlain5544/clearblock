@@ -801,6 +801,20 @@
         grid.appendChild(partner);
         document.body.appendChild(grid);
       }, 5350);
+      setTimeout(() => {
+        const list = el("ul", { class: "primary", "data-lab-content": "vg247-grid-delayed" });
+        list.style.cssText = "max-width:1200px;margin:12px auto;background:#fff;color:#111;padding:8px;list-style:none;";
+        const organic = el("li", { "data-lab-content": "vg247-editorial-delayed" });
+        organic.innerHTML =
+          '<div class="summary"><p class="title"><span class="kicker_wrapper"><span class="kicker">SPRINGFIELD GO</span></span> Monopoly Go x The Simpsons crossover is almost here</p></div>';
+        const sponsored = el("li", { "data-lab-ad": "vg247-sponsored-delayed" });
+        sponsored.innerHTML =
+          '<div class="summary"><p class="title"><span class="kicker_wrapper"><span class="kicker">SPONSORED</span></span> How To Achieve The Best Graphics on Samsung Galaxy S26</p></div>';
+        sponsored.style.cssText = "min-height:72px;background:#eee;padding:8px;";
+        list.appendChild(organic);
+        list.appendChild(sponsored);
+        document.body.appendChild(list);
+      }, 5400);
     }
     const feed = document.getElementById("fb-feed");
     if (feed) {
