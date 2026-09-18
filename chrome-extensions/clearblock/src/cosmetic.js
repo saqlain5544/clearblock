@@ -110,12 +110,15 @@ fbs-ad, .fbs-ad--top-wrapper, [class*="fbs-ad--"],
 .bc_right_sidebar a[href*="utm_medium=sponsor"],
 .featured-posts-banner, .featured-posts-banner-container,
 [class*="Content_SponsorSlug"],
-li.wdn-listv2-item:has(.listing__text--sponsored),
-li.wdn-listv2-item:has(.listing__text--sponsorship-disclaimer),
-a.card--sponsored,
-.card--sponsored,
-li.card-list__item:has(.card--sponsored),
-li.mntl-carousel__item:has(.card--sponsored),
+[class*="card--sponsored"],
+[class*="listing__text--sponsored"],
+[class*="sponsorship-disclaimer"],
+li:has(> [class*="card--sponsored"]),
+li:has(> a[class*="card--sponsored"]),
+li:has([class*="listing__text--sponsored"]),
+li:has([class*="sponsorship-disclaimer"]),
+[class*="ad-overlay"],
+.js-ad-footer,
 [data-lab-ad] {
   display: none !important;
 }
@@ -269,12 +272,14 @@ li.mntl-carousel__item:has(.card--sponsored),
     '[class*="Content_SponsorSlug"]',
     ".c-main-footer__ad-overlay",
     ".js-ad-footer",
-    "li.wdn-listv2-item:has(.listing__text--sponsored)",
-    "li.wdn-listv2-item:has(.listing__text--sponsorship-disclaimer)",
-    "a.card--sponsored",
-    ".card--sponsored",
-    "li.card-list__item:has(.card--sponsored)",
-    "li.mntl-carousel__item:has(.card--sponsored)",
+    "[class*='ad-overlay']",
+    "[class*='card--sponsored']",
+    "[class*='listing__text--sponsored']",
+    "[class*='sponsorship-disclaimer']",
+    "li:has(> [class*='card--sponsored'])",
+    "li:has(> a[class*='card--sponsored'])",
+    "li:has([class*='listing__text--sponsored'])",
+    "li:has([class*='sponsorship-disclaimer'])",
   ];
 
   const NAG_RE =
@@ -598,7 +603,7 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
       .replace(/\s+/g, " ")
       .trim();
     if (!text || /^(none|normal|auto)$/i.test(text)) return false;
-    return /^(advertisement|advertisements)(\s*[-–—]\s*scroll for more content)?$/i.test(text);
+    return /^(?:close\s+)?advertisements?(\s*[-–—]\s*scroll for more content)?$/i.test(text);
   }
 
   function pseudoContent(node, which) {
@@ -1028,80 +1033,111 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     }
   }
 
-  function hideByrdieSponsoredCards() {
+  function isSponsoredListingCopy(value) {
+    const text = String(value || "")
+      .replace(/["']/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!text || text.length > 80) return false;
+    if (/^(none|normal|auto)$/i.test(text)) return false;
+    if (/^sponsored by\b/i.test(text)) return false;
+    return (
+      /^(sponsored|promoted)$/i.test(text) ||
+      /^sponsor(?:ed)? content created with\b/i.test(text) ||
+      /^partner content from\b/i.test(text) ||
+      /^(?:advertising content from|sponsored:\s*content from)\b/i.test(text)
+    );
+  }
+
+  function isListingGrid(node) {
+    if (!node) return true;
+    if (/^(MAIN|SECTION|HEADER|NAV|FOOTER|UL|OL|BODY|HTML)$/i.test(node.tagName)) return true;
+    return !!node.matches?.(
+      "ul, ol, main, header, nav, footer, #main-content, .homepage, .main-content, .top-stories, .top-stories__cards, .card-list, .mntl-carousel, .mntl-carousel__items, .mntl-carousel__wrapper, .wdn-listv2-items, .wdn-listv2-item-lists, .wdn-listv2-item-wrapper, [class*='UCCPatternCardGrid'], [class*='UCCPatternContainer'], [class*='GridRow'], [class*='content-feed-grid']"
+    );
+  }
+
+  function sponsoredListingCard(node) {
+    if (!node || node === document.body) return null;
+    if (node.querySelector?.("video")?.videoWidth > 0) return null;
+    let found = null;
+    let el = node;
+    for (let i = 0; i < 8 && el && el !== document.body; i += 1) {
+      if (isListingGrid(el)) return found;
+      const cls = typeof el.className === "string" ? el.className : el.getAttribute?.("class") || "";
+      const tagged =
+        /card--sponsored|sponsored-post|promoted-item|UCCContainer|wdn-listv2-item|card-list__item|mntl-carousel__item|beauty-card|mntl-card|content-item/i.test(
+          cls
+        );
+      const item = /^(LI|ARTICLE)$/i.test(el.tagName) || (el.tagName === "A" && /card/i.test(cls));
+      if (tagged || item) found = el;
+      el = el.parentElement;
+    }
+    return found;
+  }
+
+  function hideSponsoredListingCards() {
     if (!enabled) return;
-    let nodes;
+    const seen = new Set();
+    let classHits;
     try {
-      nodes = document.querySelectorAll("a.card--sponsored, .card--sponsored");
+      classHits = document.querySelectorAll(
+        "[class*='card--sponsored'], [class*='listing__text--sponsored'], [class*='sponsorship-disclaimer'], [class*='sponsored-post']"
+      );
+    } catch {
+      classHits = [];
+    }
+    for (const node of classHits) {
+      if (node.tagName === "SCRIPT" || node.tagName === "STYLE") continue;
+      if (node.querySelector?.("video")?.videoWidth > 0) continue;
+      const card = sponsoredListingCard(node);
+      if (!card || seen.has(card) || isListingGrid(card)) continue;
+      seen.add(card);
+      hideNode(card, true);
+    }
+    let labels;
+    try {
+      labels = document.querySelectorAll("span, div, p, small, a, figcaption, li");
     } catch {
       return;
     }
-    for (const node of nodes) {
-      if (node.querySelector?.("video")?.videoWidth > 0) continue;
-      const card =
-        node.closest("li.card-list__item, li.mntl-carousel__item") ||
-        (node.matches?.("a.card--sponsored, .card--sponsored") ? node : null);
-      if (!card || card === document.body) continue;
+    for (const node of labels) {
+      if (node.tagName === "SCRIPT" || node.tagName === "STYLE") continue;
+      const text = (node.innerText || "").replace(/\s+/g, " ").trim();
+      const before = pseudoContent(node, "::before");
+      const after = pseudoContent(node, "::after");
       if (
-        card.matches?.(
-          "ul, ol, main, header, nav, footer, #main-content, .homepage, .main-content, .top-stories, .top-stories__cards, .card-list, .mntl-carousel, .mntl-carousel__items, .mntl-carousel__wrapper"
-        )
+        !isSponsoredListingCopy(text) &&
+        !isSponsoredListingCopy(before) &&
+        !isSponsoredListingCopy(after)
       ) {
         continue;
       }
-      if (/^(MAIN|SECTION|HEADER|NAV|FOOTER|UL|OL)$/i.test(card.tagName)) continue;
-      if (card.querySelector?.("video")?.videoWidth > 0) continue;
+      if (text.length > 80 && !isSponsoredListingCopy(text)) continue;
+      if (node.querySelector?.("video")?.videoWidth > 0) continue;
+      const card = sponsoredListingCard(node);
+      if (!card || seen.has(card) || isListingGrid(card)) continue;
+      seen.add(card);
       hideNode(card, true);
     }
   }
 
-  function hideWhoWhatWearSponsorCards() {
+  function hideStickyAdOverlays() {
     if (!enabled) return;
     let nodes;
     try {
       nodes = document.querySelectorAll(
-        ".listing__text--sponsored, .listing__text--sponsorship-disclaimer"
+        "[class*='ad-overlay'], [class*='ad-footer'], .js-ad-footer, .c-main-footer__ad-overlay"
       );
     } catch {
       return;
     }
     for (const node of nodes) {
       if (node.querySelector?.("video")?.videoWidth > 0) continue;
-      const text = (node.innerText || "").replace(/\s+/g, " ").trim();
-      if (!/^sponsor content created with\b/i.test(text) || text.length > 80) continue;
-      const card = node.closest("li.wdn-listv2-item");
-      if (!card || card === document.body) continue;
-      if (
-        card.matches?.(
-          "ul, ol, main, header, nav, footer, #main-content, .homepage, .main-content, .wdn-listv2-items, .wdn-listv2-item-lists, .wdn-listv2-item-wrapper"
-        )
-      ) {
-        continue;
-      }
-      if (/^(MAIN|SECTION|HEADER|NAV|FOOTER|UL|OL)$/i.test(card.tagName)) continue;
-      if (card.querySelector?.("video")?.videoWidth > 0) continue;
-      hideNode(card, true);
-    }
-  }
-
-  function hideTacFooterAdOverlay() {
-    if (!enabled) return;
-    let nodes;
-    try {
-      nodes = document.querySelectorAll(".c-main-footer__ad-overlay, .js-ad-footer");
-    } catch {
-      return;
-    }
-    for (const node of nodes) {
-      if (node.querySelector?.("video")?.videoWidth > 0) continue;
-      if (
-        node.matches?.(
-          "footer, .c-main-footer, main, header, nav, #main-content, .homepage, .main-content"
-        )
-      ) {
-        continue;
-      }
+      if (isListingGrid(node)) continue;
       if (/^(MAIN|SECTION|HEADER|NAV|FOOTER)$/i.test(node.tagName)) continue;
+      const text = (node.innerText || "").replace(/\s+/g, " ").trim();
+      if (text.length > 160 && !/advertisement/i.test(text)) continue;
       hideNode(node, true);
     }
   }
@@ -1392,9 +1428,8 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     hideIgnPromotedItems();
     hideThrillistPartnerCards();
     hideVg247SponsoredCards();
-    hideWhoWhatWearSponsorCards();
-    hideByrdieSponsoredCards();
-    hideTacFooterAdOverlay();
+    hideSponsoredListingCards();
+    hideStickyAdOverlays();
     hideSlashdotLeftovers();
     hideDigitalTrendsSponsored();
     hideNatGeoPaidContent();
