@@ -308,6 +308,10 @@
         scripted.style.padding = "12px";
         mount.appendChild(scripted);
       }, 2000);
+      setTimeout(() => {
+        const gpt = document.getElementById("div-gpt-ad-desktop_hero");
+        if (gpt) gpt.style.setProperty("display", "block", "important");
+      }, 1400);
     }
     const feed = document.getElementById("fb-feed");
     if (feed) {

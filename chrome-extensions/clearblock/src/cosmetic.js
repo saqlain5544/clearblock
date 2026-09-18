@@ -36,6 +36,8 @@ ytd-rich-item-renderer:has(ytd-ad-slot-renderer),
 [class*="ytp-ad-"], .ytp-flyout-cta, .ytp-paid-content-overlay,
 .jw-ad, .video-js-ad, .ima-ad-container, .vast-ad,
 iframe[id^="google_ads"], iframe[src*="doubleclick"], iframe[src*="googlesyndication"],
+iframe[id^="google_ads_iframe"], [id*="google_ads_iframe"], [id^="div-gpt-ad"],
+.dfp_ad--rendered, .dfp_ad--is-filled, .dfp_ad--held-area,
 .fave-ad-playing #overlay-root, .fave-player-container.fave-ad-playing #overlay-root,
 .fave-ad-playing .pui_ad, .fave-ad-slate,
 .s-item--ad, .s-item__ad, .s-item--sponsored, .s-card--ad, .promoted-listing,
@@ -81,6 +83,12 @@ iframe[id^="google_ads_iframe"],
     ".sb-video-creative",
     "iframe[id^='google_ads']",
     "iframe[id^='google_ads_iframe']",
+    "[id^='google_ads_iframe']",
+    "[id*='google_ads_iframe']",
+    "[id^='div-gpt-ad']",
+    ".dfp_ad--is-filled",
+    ".dfp_ad--rendered",
+    ".dfp_ad--held-area",
   ];
 
   const NAG_RE =
@@ -134,10 +142,11 @@ iframe[id^="google_ads_iframe"],
   }
 
   function hideNode(node, force) {
-    if (!node || hidden.has(node)) return;
+    if (!node) return;
     if (!force && isProtected(node)) return;
-    hidden.add(node);
     node.style.setProperty("display", "none", "important");
+    if (hidden.has(node)) return;
+    hidden.add(node);
     hiddenCount += 1;
   }
 
@@ -203,9 +212,26 @@ iframe[id^="google_ads_iframe"],
     root.appendChild(bait);
   }
 
+  function hideRetailSponsored() {
+    if (!enabled) return;
+    const nodes = document.querySelectorAll(
+      "[data-test='container-cdui-item-wrapper'], [data-test='text-quill-insert-0']"
+    );
+    for (const node of nodes) {
+      const text = (node.innerText || "").trim();
+      if (!/^sponsored$/i.test(text)) continue;
+      const card =
+        node.closest("a[data-test='content']") ||
+        node.closest("[data-test='container-cdui']") ||
+        node.parentElement;
+      if (card) hideNode(card, true);
+    }
+  }
+
   function sweep() {
     hideMatches(EXTRA_HIDE, true);
     hideMatches(specificSelectors, false);
+    hideRetailSponsored();
     dismissNags();
   }
 
@@ -230,7 +256,12 @@ iframe[id^="google_ads_iframe"],
       return;
     }
     observer = new MutationObserver(() => sweep());
-    observer.observe(root, { childList: true, subtree: true });
+    observer.observe(root, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["style", "class", "id"],
+    });
   }
 
   async function applySpecific(host) {
@@ -275,7 +306,7 @@ iframe[id^="google_ads_iframe"],
     await applySpecific(host);
     startObserver();
     sweep();
-    setInterval(sweep, 1200);
+    setInterval(sweep, 500);
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", () => {
         plantBait();
