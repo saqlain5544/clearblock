@@ -586,7 +586,7 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
       .replace(/\s+/g, " ")
       .trim();
     if (!text || /^(none|normal|auto)$/i.test(text)) return false;
-    return /^(advertisement|advertisements)$/i.test(text);
+    return /^(advertisement|advertisements)(\s*[-–—]\s*scroll for more content)?$/i.test(text);
   }
 
   function pseudoContent(node, which) {

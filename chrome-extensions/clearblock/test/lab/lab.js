@@ -830,6 +830,16 @@
         document.body.appendChild(footer);
         document.body.appendChild(overlay);
       }, 5450);
+      setTimeout(() => {
+        const header = el("header", { "data-lab-content": "hoopshype-header-delayed" });
+        header.style.cssText = "max-width:1200px;margin:12px auto;background:#fff;color:#111;padding:8px;";
+        header.textContent = "HoopsHype NBA rumors";
+        const slot = el("div", { "data-lab-ad": "usatoday-scroll-ad-delayed" });
+        slot.style.cssText = "min-height:32px;background:#eee;padding:8px;";
+        slot.innerHTML = "<p>Advertisement - scroll for more content</p>";
+        document.body.appendChild(header);
+        document.body.appendChild(slot);
+      }, 5500);
     }
     const feed = document.getElementById("fb-feed");
     if (feed) {
