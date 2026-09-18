@@ -17,6 +17,8 @@ MAX_GENERIC_SELECTORS = 20_000
 MAX_SPECIFIC_SELECTORS = 20_000
 PRIORITY_COSMETIC_HOSTS = ("youtube.com", "m.youtube.com", "youtube-nocookie.com", "youtu.be")
 
+# Generic EasyList blocks never include `media`. Blocking media on a shared
+# CDN is how ad blockers accidentally kill HTML5 / HLS / DASH playback.
 RESOURCE_TYPES = [
     "sub_frame",
     "stylesheet",
@@ -26,10 +28,13 @@ RESOURCE_TYPES = [
     "object",
     "xmlhttprequest",
     "ping",
-    "media",
     "websocket",
     "other",
 ]
+
+# Known ad networks may still block media — those hosts serve ad creatives, not
+# the video the user asked to watch.
+AD_NETWORK_RESOURCE_TYPES = RESOURCE_TYPES + ["media"]
 
 NEVER_BLOCK_DOMAINS = {
     "google.com",
@@ -45,11 +50,26 @@ NEVER_BLOCK_DOMAINS = {
     "ggpht.com",
     "googlevideo.com",
     "youtubekids.com",
+    "youtube.googleapis.com",
+    "jnn-pa.googleapis.com",
     "wide-vine.com",
     "widevine.com",
     "recaptcha.net",
     "g.co",
     "googleadservices.com",  # blocked via dedicated youtube ruleset, not generic
+    "vimeo.com",
+    "vimeocdn.com",
+    "ttvnw.net",
+    "jtvnw.net",
+    "twitch.tv",
+    "twitchcdn.net",
+    "video.twimg.com",
+    "pscp.tv",
+    "dailymotion.com",
+    "dmcdn.net",
+    "cloudflarestream.com",
+    "mux.com",
+    "mux.dev",
     "cloudflare.com",
     "jsdelivr.net",
     "unpkg.com",
@@ -64,6 +84,55 @@ NEVER_BLOCK_DOMAINS = {
     "microsoft.com",
     "windowsupdate.com",
 }
+
+# Highest-priority DNR allows. These beat every block ruleset.
+MEDIA_ALLOW_DOMAINS = [
+    "googlevideo.com",
+    "ytimg.com",
+    "ggpht.com",
+    "googleusercontent.com",
+    "gvt1.com",
+    "gvt2.com",
+    "gstatic.com",
+    "youtube.googleapis.com",
+    "jnn-pa.googleapis.com",
+    "widevine.com",
+    "vimeo.com",
+    "vimeocdn.com",
+    "ttvnw.net",
+    "jtvnw.net",
+    "twitchcdn.net",
+    "video.twimg.com",
+    "pscp.tv",
+    "dailymotion.com",
+    "dmcdn.net",
+    "cloudflarestream.com",
+    "mux.com",
+    "mux.dev",
+]
+
+MEDIA_ALLOW_PATHS = [
+    "||youtube.com/s/player",
+    "||youtube.com/embed",
+    "||youtube.com/iframe_api",
+    "||youtube.com/get_video_info",
+    "||youtube.com/api/stats/watchtime",
+    "||youtube-nocookie.com/s/player",
+    "||youtube-nocookie.com/embed",
+    "||youtube-nocookie.com/iframe_api",
+    "||youtu.be/",
+]
+
+VIDEO_PATH_RE = re.compile(
+    r"videoplayback|\.m3u8|\.mpd|\.m4s(\b|$)|/hls/|/dash/|\.webm|\.m4v\b",
+    re.I,
+)
+
+AD_NETWORK_ALLOW_DENY = re.compile(
+    r"doubleclick|googlesyndication|googleadservices|adservice\.google|"
+    r"pagead|2mdn\.net|googletagservices|ads\.youtube",
+    re.I,
+)
 
 # Always-on high-priority network filters. YouTube video bytes live on
 # googlevideo.com, so we never block that host — only known ad endpoints.
@@ -81,10 +150,15 @@ YOUTUBE_AND_CORE = [
     "||youtube.com/api/stats/atr",
     "||youtube.com/get_midroll_",
     "||youtube.com/pcs/activeview",
+    "||youtube.com/pcs/view",
     "||youtube.com/pagead/",
     "||s.youtube.com/api/stats/ads",
     "||youtube.com/youtubei/v1/player/ad",
+    "||youtube.com/youtubei/v1/player/ad_break",
     "||youtube.com/generate_204?ctia=",
+    "||google.com/pagead",
+    "||google.com/pagead/",
+    "||youtube.com/get_midroll",
     "||fwmrm.net^",
     "||innovid.com^",
     "||serving-sys.com^",
@@ -429,6 +503,8 @@ def build() -> None:
             host = domain_from_hostname_filter(body)
             if host and never_block(host) and "/" not in url_filter.replace("||", ""):
                 continue
+            if VIDEO_PATH_RE.search(body):
+                continue
             if host and "^" in body and "/" not in body.split("$")[0]:
                 # Pure domain block — keep the best score per domain.
                 block_domains[host] = max(block_domains.get(host, -999), score_domain(host, section))
@@ -450,7 +526,7 @@ def build() -> None:
                 "id": rid,
                 "priority": 20,
                 "action": {"type": "block"},
-                "condition": {"urlFilter": url_filter, "resourceTypes": list(RESOURCE_TYPES)},
+                "condition": {"urlFilter": url_filter, "resourceTypes": list(AD_NETWORK_RESOURCE_TYPES)},
             }
         )
         rid += 1
@@ -482,7 +558,7 @@ def build() -> None:
         if url_filter in seen_filters:
             continue
         seen_filters.add(url_filter)
-        condition = {"urlFilter": url_filter, "resourceTypes": parsed["resourceTypes"]}
+        condition = {"urlFilter": url_filter, "resourceTypes": [t for t in parsed["resourceTypes"] if t != "media"] or list(RESOURCE_TYPES)}
         if parsed["domainType"]:
             condition["domainType"] = parsed["domainType"]
         if parsed["initiatorDomains"]:
@@ -498,11 +574,14 @@ def build() -> None:
     for url_filter, parsed in allow_rules:
         if rid > MAX_ALLOW_RULES:
             break
+        if AD_NETWORK_ALLOW_DENY.search(url_filter):
+            continue
         key = (url_filter, tuple(parsed["resourceTypes"]), parsed["domainType"])
         if key in seen_allow:
             continue
         seen_allow.add(key)
-        condition = {"urlFilter": url_filter, "resourceTypes": parsed["resourceTypes"]}
+        resource_types = [t for t in parsed["resourceTypes"] if t != "media"] or list(RESOURCE_TYPES)
+        condition = {"urlFilter": url_filter, "resourceTypes": resource_types}
         if parsed["domainType"]:
             condition["domainType"] = parsed["domainType"]
         if parsed["initiatorDomains"]:
@@ -511,6 +590,43 @@ def build() -> None:
             condition["excludedInitiatorDomains"] = parsed["excludedInitiatorDomains"]
         allow_out.append({"id": rid, "priority": 50, "action": {"type": "allow"}, "condition": condition})
         rid += 1
+
+    media_rules = []
+    mid = 1
+    all_types = list(AD_NETWORK_RESOURCE_TYPES)
+    media_rules.append(
+        {
+            "id": mid,
+            "priority": 500,
+            "action": {"type": "allow"},
+            "condition": {"requestDomains": list(MEDIA_ALLOW_DOMAINS), "resourceTypes": all_types},
+        }
+    )
+    mid += 1
+    media_rules.append(
+        {
+            "id": mid,
+            "priority": 500,
+            "action": {"type": "allow"},
+            "condition": {
+                "requestDomains": ["youtube.com", "youtube-nocookie.com", "youtu.be", "youtubekids.com"],
+                "resourceTypes": ["media"],
+            },
+        }
+    )
+    mid += 1
+    for url_filter in MEDIA_ALLOW_PATHS:
+        if not valid_url_filter(url_filter):
+            continue
+        media_rules.append(
+            {
+                "id": mid,
+                "priority": 500,
+                "action": {"type": "allow"},
+                "condition": {"urlFilter": url_filter, "resourceTypes": all_types},
+            }
+        )
+        mid += 1
 
     # Deduplicate generic selectors, keep EasyList order (usually higher-signal first).
     seen_sel = set()
@@ -523,15 +639,7 @@ def build() -> None:
         if len(generic_unique) >= MAX_GENERIC_SELECTORS:
             break
 
-    css_chunks = []
-    chunk: list[str] = []
-    for sel in generic_unique:
-        chunk.append(sel)
-        if len(chunk) >= 80:
-            css_chunks.append(",".join(chunk) + "{display:none!important}")
-            chunk = []
-    if chunk:
-        css_chunks.append(",".join(chunk) + "{display:none!important}")
+    css_chunks = [sel + "{display:none!important}" for sel in generic_unique]
     generic_css = (
         f"/* EasyList generic cosmetics — bundled snapshot {version_line} */\n"
         + "\n".join(css_chunks)
@@ -567,6 +675,7 @@ def build() -> None:
     (RULES / "dnr-youtube.json").write_text(json.dumps(youtube_rules, separators=(",", ":")), encoding="utf-8")
     (RULES / "dnr-ads.json").write_text(json.dumps(ads_rules, separators=(",", ":")), encoding="utf-8")
     (RULES / "dnr-allow.json").write_text(json.dumps(allow_out, separators=(",", ":")), encoding="utf-8")
+    (RULES / "dnr-media.json").write_text(json.dumps(media_rules, separators=(",", ":")), encoding="utf-8")
     (RULES / "cosmetic-generic.css").write_text(generic_css, encoding="utf-8")
     (RULES / "cosmetic-specific.json").write_text(json.dumps(specific_trim, separators=(",", ":")), encoding="utf-8")
     (RULES / "manifest-meta.json").write_text(
@@ -576,6 +685,7 @@ def build() -> None:
                 "youtubeRules": len(youtube_rules),
                 "adRules": len(ads_rules),
                 "allowRules": len(allow_out),
+                "mediaAllowRules": len(media_rules),
                 "genericSelectors": len(generic_unique),
                 "specificHosts": len(specific_trim),
                 "specificSelectors": count_spec,

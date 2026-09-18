@@ -1,7 +1,10 @@
 /**
- * Runs in the page's MAIN world so it can see YouTube's own fetch/XHR/player objects.
- * YouTube often serves ads from the same googlevideo.com hosts as the video, so
- * network blocking alone cannot strip prerolls. This patches player JSON instead.
+ * MAIN-world YouTube hooks.
+ *
+ * Video bytes live on googlevideo.com alongside ads, so network blocking
+ * cannot take down prerolls without also killing the video. This script
+ * strips ad payloads from player JSON and leaves streamingData intact
+ * unless a classic DASH/HLS fallback is already present.
  */
 (() => {
   const AD_RENDERERS = new Set([
@@ -16,11 +19,15 @@
     "actionCompanionAdRenderer",
     "bannerPromoRenderer",
     "adHovercardContainerRenderer",
-    "promotedSparklesWebRenderer",
+    "companionAdRenderer",
+    "adDurationRemainingRenderer",
+    "instreamAdPlayerOverlayRenderer",
+    "playerLegacyDesktopWatchAdsRenderer",
+    "adInfoRenderer",
+    "adPrimaryVideoRenderer",
   ]);
 
   let enabled = document.documentElement?.getAttribute("data-clearblock") !== "off";
-  let lastStrip = 0;
 
   window.addEventListener("clearblock:config", (event) => {
     enabled = Boolean(event.detail?.enabled);
@@ -29,55 +36,106 @@
   function isAdRenderer(value) {
     if (!value || typeof value !== "object") return false;
     const key = Object.keys(value)[0] || "";
-    return AD_RENDERERS.has(key) || /^(adPlacement|adSlot|promotedSparkles|inFeedAdLayout)/.test(key);
+    return AD_RENDERERS.has(key) || /^(adPlacement|adSlot|promotedSparkles|inFeedAdLayout|companionAd)/.test(key);
+  }
+
+  function hasClassicFormats(streaming) {
+    if (!streaming || typeof streaming !== "object") return false;
+    return (
+      (Array.isArray(streaming.adaptiveFormats) && streaming.adaptiveFormats.length > 0) ||
+      (Array.isArray(streaming.formats) && streaming.formats.length > 0)
+    );
   }
 
   function stripAds(value, depth) {
-    if (!enabled || !value || typeof value !== "object" || depth > 12) return value;
+    if (!enabled || !value || typeof value !== "object" || depth > 14) return false;
+    let removed = false;
     if (Array.isArray(value)) {
       for (let i = value.length - 1; i >= 0; i -= 1) {
-        if (isAdRenderer(value[i])) value.splice(i, 1);
-        else stripAds(value[i], depth + 1);
+        if (isAdRenderer(value[i])) {
+          value.splice(i, 1);
+          removed = true;
+        } else if (stripAds(value[i], depth + 1)) {
+          removed = true;
+        }
       }
-      return value;
+      return removed;
     }
-    if (value.adPlacements) value.adPlacements = [];
-    if (value.adSlots) value.adSlots = [];
-    if (value.playerAds) value.playerAds = [];
-    if (value.adBreakHeartbeatParams) delete value.adBreakHeartbeatParams;
-    if (value.streamingData && value.streamingData.serverAbrStreamingUrl) {
+    if (Array.isArray(value.adPlacements) && value.adPlacements.length) {
+      value.adPlacements = [];
+      removed = true;
+    }
+    if (Array.isArray(value.adSlots) && value.adSlots.length) {
+      value.adSlots = [];
+      removed = true;
+    }
+    if (Array.isArray(value.playerAds) && value.playerAds.length) {
+      value.playerAds = [];
+      removed = true;
+    }
+    if (value.adBreakHeartbeatParams) {
+      delete value.adBreakHeartbeatParams;
+      removed = true;
+    }
+    if (value.adBreakParams) {
+      delete value.adBreakParams;
+      removed = true;
+    }
+    if (value.streamingData && hasClassicFormats(value.streamingData) && value.streamingData.serverAbrStreamingUrl) {
+      // Drop SABR only when DASH/HLS formats already exist so playback still has a path.
       delete value.streamingData.serverAbrStreamingUrl;
-    }
-    if (value.playerConfig?.audioConfig) {
-      value.playerConfig.audioConfig.enableHifiOnPremiumOnly = false;
+      removed = true;
     }
     if (value.auxiliaryUi?.messageRenderers?.upsellDialogRenderer) {
       delete value.auxiliaryUi.messageRenderers.upsellDialogRenderer;
+      removed = true;
     }
-    if (value.playerResponse) stripAds(value.playerResponse, depth + 1);
-    return value;
+    if (value.playerResponse && stripAds(value.playerResponse, depth + 1)) removed = true;
+    return removed;
   }
 
-  function noteStrip() {
-    const now = Date.now();
-    if (now - lastStrip < 4000) return;
-    lastStrip = now;
-    window.postMessage({ source: "clearblock-yt", kind: "strip" }, "*");
-  }
-
-  function patchIfPlayer(data) {
-    if (!data || typeof data !== "object") return data;
-    const looksLikePlayer =
+  function looksLikePlayer(data) {
+    if (!data || typeof data !== "object") return false;
+    return (
       Array.isArray(data.adPlacements) ||
       Array.isArray(data.adSlots) ||
       Array.isArray(data.playerAds) ||
       (data.videoDetails && data.streamingData) ||
-      data.playerResponse;
-    if (looksLikePlayer) {
-      stripAds(data, 0);
-      noteStrip();
+      (data.playerResponse && typeof data.playerResponse === "object")
+    );
+  }
+
+  function patchIfPlayer(data) {
+    if (!looksLikePlayer(data)) return data;
+    const removed = stripAds(data, 0);
+    if (removed) {
+      window.postMessage({ source: "clearblock-yt", kind: "strip" }, "*");
     }
     return data;
+  }
+
+  function playerApiUrl(url) {
+    return typeof url === "string" && /\/youtubei\/v1\/(player|next|browse|reel\/reel_item_watch)/.test(url);
+  }
+
+  function stripAdSignals(init) {
+    if (!init || typeof init.body !== "string") return init;
+    try {
+      const body = JSON.parse(init.body);
+      let changed = false;
+      if (body.adSignalsInfo) {
+        delete body.adSignalsInfo;
+        changed = true;
+      }
+      if (body.playbackContext?.adPlaybackContext) {
+        delete body.playbackContext.adPlaybackContext;
+        changed = true;
+      }
+      if (!changed) return init;
+      return Object.assign({}, init, { body: JSON.stringify(body) });
+    } catch {
+      return init;
+    }
   }
 
   function hookJsonParse() {
@@ -97,10 +155,9 @@
     if (typeof original !== "function") return;
     window.fetch = function clearblockFetch(input, init) {
       const url = typeof input === "string" ? input : input && input.url;
+      if (playerApiUrl(url)) init = stripAdSignals(init);
       const request = original.call(this, input, init);
-      if (typeof url !== "string" || !/\/youtubei\/v1\/(player|next|reel\/reel_item_watch)/.test(url)) {
-        return request;
-      }
+      if (!playerApiUrl(url)) return request;
       return request.then(async (response) => {
         try {
           const data = await response.clone().json();
@@ -125,7 +182,7 @@
       return origOpen.call(this, method, url, ...rest);
     };
     XMLHttpRequest.prototype.send = function clearblockSend(body) {
-      if (/\/youtubei\/v1\/(player|next)/.test(this.__clearblockUrl || "")) {
+      if (playerApiUrl(this.__clearblockUrl || "")) {
         this.addEventListener("readystatechange", function onReady() {
           if (this.readyState !== 4) return;
           try {
@@ -134,7 +191,7 @@
             Object.defineProperty(this, "responseText", { value: JSON.stringify(data) });
             Object.defineProperty(this, "response", { value: JSON.stringify(data) });
           } catch {
-            // Leave the original payload in place.
+            // Leave the original payload in place so playback can continue.
           }
         });
       }

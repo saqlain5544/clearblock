@@ -1,5 +1,5 @@
 const Clearblock = (() => {
-  const RULESET_IDS = ["youtube", "ads", "allow"];
+  const RULESET_IDS = ["youtube", "ads", "allow", "media"];
 
   const RESOURCE_TYPES = [
     "main_frame",

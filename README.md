@@ -6,7 +6,12 @@ Blocking is a mix of:
 
 - **Network rules** (`declarativeNetRequest`) compiled from a bundled [EasyList](https://easylist.to/) snapshot, plus a high-priority set for common ad networks.
 - **Cosmetic hiding** for leftover ad slots in the page.
-- **YouTube-specific protection**, because preroll and in-player ads often share `googlevideo.com` with the video itself. Clearblock does **not** block that host. It strips ad payloads from player responses, hides in-feed/sidebar slots, and skips or fast-forwards leftover prerolls.
+- **YouTube-specific protection**, because preroll and in-player ads often share `googlevideo.com` with the video itself. Clearblock does **not** block that host, or other playback CDNs. It strips ad payloads from player responses, hides in-feed/sidebar/companion slots, and skips leftover prerolls **only** while the player has the `ad-showing` class — it will not seek or speed up ordinary playback.
+
+Two invariants:
+
+1. **Never block video.** HTML5, HLS, DASH, YouTube streams, embeds, manifests, segments, and in-player thumbnails are allowlisted. A rule that would take down media is treated as a false positive.
+2. **No ads.** Network filters plus cosmetics, including YouTube preroll, mid-roll, overlay, homepage, sidebar, and companion slots.
 
 Counts and settings live in `chrome.storage.local` on this device and survive Chrome restarts.
 
@@ -30,6 +35,7 @@ Network blocking applies as soon as you toggle the extension. Reload the tab aft
 | `rules/dnr-youtube.json` | High-priority YouTube / ad-network network rules |
 | `rules/dnr-ads.json` | EasyList-derived domain and path blocks |
 | `rules/dnr-allow.json` | EasyList exception rules that DNR can express |
+| `rules/dnr-media.json` | High-priority allows for video CDNs and player assets |
 | `rules/cosmetic-generic.css` | Generic element hiding |
 | `rules/cosmetic-specific.json` | Per-site element hiding |
 
@@ -54,6 +60,8 @@ EasyList is copyright the EasyList authors and licensed under the GNU GPLv3. The
 
 Nothing is sent to a Clearblock server. Visiting a website still talks to that website; Clearblock only cancels known ad requests and hides known ad UI.
 
-## Local ad lab
+## Local labs
 
 `test/ad-lab.html` is a fixture page with EasyList cosmetic slots and requests to Google ad hosts. Load the extension, open that file in Chrome, and the red slots should vanish while the ad-host requests fail.
+
+`test/video-lab.html` plays a local MP4 and a remote HTML5 sample. Both must play with Clearblock on; the red ad slots on that page should still hide.
