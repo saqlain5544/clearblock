@@ -52,6 +52,8 @@ iframe[id^="google_ads_iframe"],
 [id*="adblock-wall"], [class*="disable-adblock"], .anti-adblock, .antiadblock,
 [data-anti-adblock], .adblock-msg, .adblocker-msg, .ad-block-msg,
 #blockadblock, .blockadblock, .fuckadblock, .adsbox-clone,
+.spon-qp, [class*="sponsored-quick"], .sponsored-quick-post,
+[class*="admiral"], .admiral-unit,
 [data-lab-ad] {
   display: none !important;
 }
@@ -89,10 +91,14 @@ iframe[id^="google_ads_iframe"],
     ".dfp_ad--is-filled",
     ".dfp_ad--rendered",
     ".dfp_ad--held-area",
+    ".spon-qp",
+    "[class*='sponsored-quick']",
+    "[class*='admiral']",
+    ".admiral-unit",
   ];
 
   const NAG_RE =
-    /disable (your )?ad.?block|turn off (your )?ad.?block|whitelist (this|our|the) (site|ad)|ad blockers? (are|is) not allowed|please (disable|turn off|whitelist).{0,24}ad.?block|allowed on youtube/i;
+    /disable (your )?ad.?block|turn off (your )?ad.?block|whitelist (this|our|the) (site|ad)|allowlist .{0,48}|ad blockers? (are|is) not allowed|please (disable|turn off|whitelist).{0,24}ad.?block|allowed on youtube|allowing ads|using your ad blocker|continue using your ad blocker|support .{0,40}by allowing ads/i;
 
   const PROTECT_TAGS = new Set(["VIDEO", "AUDIO", "SOURCE", "TRACK", "CANVAS"]);
 
@@ -170,7 +176,7 @@ iframe[id^="google_ads_iframe"],
       "div, aside, section, dialog, [role='dialog'], [role='alertdialog']"
     );
     for (const node of candidates) {
-      if (hidden.has(node) || isProtected(node)) continue;
+      if (isProtected(node)) continue;
       if (node.closest?.("[data-lab-content], #movie_player, video, article.web-article, .fb-post[data-lab-content]")) {
         continue;
       }
@@ -182,9 +188,9 @@ iframe[id^="google_ads_iframe"],
       const covers =
         position === "fixed" ||
         position === "sticky" ||
-        /modal|overlay|wall|dialog|paywall|adblock/i.test(`${node.className} ${node.id}`);
+        /modal|overlay|wall|dialog|paywall|adblock|admiral/i.test(`${node.className} ${node.id}`);
       if (!covers) continue;
-      hideNode(node);
+      hideNode(node, true);
     }
     flushCosmeticCount();
     const html = document.documentElement;
