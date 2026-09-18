@@ -105,6 +105,8 @@ a.zd-featured-deals__card[data-zd-track-item-name^="sponsored:"],
 .fairplay-container, .fairplay-container.Offer, [data-qa="fair-play-component"],
 oc-connect-widget,
 fbs-ad, .fbs-ad--top-wrapper, [class*="fbs-ad--"],
+.body-cheat__identifier--branded,
+.bc_right_sidebar a[href*="/rd/"],
 [data-lab-ad] {
   display: none !important;
 }
@@ -249,6 +251,8 @@ fbs-ad, .fbs-ad--top-wrapper, [class*="fbs-ad--"],
     "fbs-ad",
     ".fbs-ad--top-wrapper",
     '[class*="fbs-ad--"]',
+    ".body-cheat__identifier--branded",
+    '.bc_right_sidebar a[href*="/rd/"]',
   ];
 
   const NAG_RE =
@@ -726,6 +730,110 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     }
   }
 
+  function hideIndependentSponsoredCards() {
+    if (!enabled) return;
+    let cards;
+    try {
+      cards = document.querySelectorAll("article");
+    } catch {
+      return;
+    }
+    for (const card of cards) {
+      if (card.querySelector?.("video")?.videoWidth > 0) continue;
+      const text = (card.innerText || "").replace(/\s+/g, " ").trim();
+      if (!/^sponsored\b/i.test(text) || text.length > 400) continue;
+      let labeled = false;
+      try {
+        labeled = [...card.querySelectorAll("p, div, span, small")].some((n) =>
+          /^sponsored$/i.test((n.innerText || "").replace(/\s+/g, " ").trim())
+        );
+      } catch {
+        labeled = false;
+      }
+      if (!labeled) continue;
+      hideNode(card, true);
+      const wrap = card.parentElement;
+      if (!wrap || wrap === document.body) continue;
+      if (/^(MAIN|ARTICLE|HEADER|NAV|FOOTER)$/i.test(wrap.tagName)) continue;
+      if (wrap.querySelector?.("video")?.videoWidth > 0) continue;
+      const wtext = (wrap.innerText || "").replace(/\s+/g, " ").trim();
+      if (/latest videos|travel\b|politics|midterms/i.test(wtext)) continue;
+      const organic = [...(wrap.querySelectorAll?.("article") || [])].filter((other) => {
+        if (other === card) return false;
+        const ot = (other.innerText || "").replace(/\s+/g, " ").trim();
+        return ot && !/^sponsored\b/i.test(ot);
+      });
+      if (organic.length) continue;
+      if (wtext.length > 500) continue;
+      hideNode(wrap, true);
+    }
+  }
+
+  function hideDailyBeastPartnerCards() {
+    if (!enabled) return;
+    let nodes;
+    try {
+      nodes = document.querySelectorAll(".body-cheat__identifier--branded");
+    } catch {
+      return;
+    }
+    for (const node of nodes) {
+      if (node.querySelector?.("video")?.videoWidth > 0) continue;
+      const card = node.closest("li") || node.parentElement;
+      if (!card || card === document.body) continue;
+      if (/^(MAIN|ARTICLE|HEADER|NAV|FOOTER|UL|OL)$/i.test(card.tagName) && card.tagName !== "LI") continue;
+      if (card.querySelector?.("video")?.videoWidth > 0) continue;
+      const text = (card.innerText || "").replace(/\s+/g, " ").trim();
+      if (/shop with scouted/i.test(text) && !/partner update/i.test(text)) continue;
+      hideNode(card, true);
+    }
+  }
+
+  function hideBleepingComputerLeftovers() {
+    if (!enabled) return;
+    let banners;
+    try {
+      banners = document.querySelectorAll(".bc_right_sidebar a[href*='/rd/']");
+    } catch {
+      banners = [];
+    }
+    for (const a of banners) {
+      if (a.querySelector?.("video")?.videoWidth > 0) continue;
+      hideNode(a, true);
+      const wrap = a.parentElement;
+      if (!wrap || wrap === document.body) continue;
+      const wcls = typeof wrap.className === "string" ? wrap.className : wrap.getAttribute?.("class") || "";
+      if (/bc_right_sidebar|bc_main_content|bc_wrapper|container|row/i.test(wcls)) continue;
+      if (/^(MAIN|ARTICLE|HEADER|NAV|FOOTER)$/i.test(wrap.tagName)) continue;
+      if (wrap.querySelector?.("video")?.videoWidth > 0) continue;
+      const wtext = (wrap.innerText || "").replace(/\s+/g, " ").trim();
+      if (/popular stories|latest articles/i.test(wtext)) continue;
+      if (wtext.length > 80) continue;
+      hideNode(wrap, true);
+    }
+    let authors;
+    try {
+      authors = document.querySelectorAll("li.bc_news_author");
+    } catch {
+      return;
+    }
+    for (const author of authors) {
+      const t = (author.innerText || "").replace(/\s+/g, " ").trim();
+      if (!/\bsponsorship\b/i.test(t)) continue;
+      let card = author.parentElement;
+      while (card && card !== document.body) {
+        if (card.tagName === "LI" && !card.classList?.contains("bc_news_author")) break;
+        card = card.parentElement;
+      }
+      if (!card || card === document.body) continue;
+      if (/^(MAIN|ARTICLE|HEADER|NAV|FOOTER|UL|OL)$/i.test(card.tagName) && card.tagName !== "LI") continue;
+      if (card.querySelector?.("video")?.videoWidth > 0) continue;
+      const ctext = (card.innerText || "").replace(/\s+/g, " ").trim();
+      if (/popular stories/i.test(ctext) && ctext.length > 160) continue;
+      hideNode(card, true);
+    }
+  }
+
   function hideForbesAdSlots() {
     if (!enabled) return;
     let nodes;
@@ -856,6 +964,9 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     hideCNetSponsoredDeals();
     hideFoxSportsBetOffers();
     hideForbesAdSlots();
+    hideIndependentSponsoredCards();
+    hideDailyBeastPartnerCards();
+    hideBleepingComputerLeftovers();
     hideBloombergAdSlots();
     hideSportsAdSlots();
     hideOptidigitalSlots();

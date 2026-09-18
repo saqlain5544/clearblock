@@ -509,6 +509,46 @@
         slot.style.cssText = "display:block;min-height:28px;margin:12px auto;color:#999;letter-spacing:.2em;text-align:center;";
         document.body.appendChild(slot);
       }, 3900);
+      setTimeout(() => {
+        const card = el("article", { "data-lab-ad": "independent-sponsored-delayed" });
+        const label = el("p", { class: "slot-primary" });
+        label.textContent = "SPONSORED";
+        card.appendChild(label);
+        card.appendChild(document.createTextNode(" Celebrate the end of summer with these Labor Day offers"));
+        card.style.cssText = "max-width:230px;min-height:72px;margin:12px auto;background:#eee;padding:8px;";
+        document.body.appendChild(card);
+      }, 4000);
+      setTimeout(() => {
+        const li = el("li", { "data-lab-ad": "dailybeast-partner-delayed" });
+        const ident = el("div", { class: "body-cheat__identifier body-cheat__identifier--branded" });
+        ident.textContent = "PARTNER UPDATE";
+        li.appendChild(ident);
+        li.appendChild(document.createTextNode(" Your Current VPN May Be Spying on You"));
+        li.style.cssText = "max-width:320px;min-height:72px;margin:12px auto;background:#eee;padding:8px;";
+        document.body.appendChild(li);
+      }, 4100);
+      setTimeout(() => {
+        const aside = el("aside", { class: "bc_right_sidebar" });
+        const a = el("a", {
+          href: "https://www.bleepingcomputer.com/rd/99/",
+          "data-lab-ad": "bc-rd-banner-delayed",
+        });
+        a.textContent = "Material leftover banner";
+        a.style.cssText = "display:block;min-height:48px;margin:12px auto;background:#222;color:#fff;padding:8px;";
+        aside.appendChild(a);
+        document.body.appendChild(aside);
+      }, 4200);
+      setTimeout(() => {
+        const card = el("li", { "data-lab-ad": "bc-sponsorship-delayed" });
+        card.appendChild(document.createTextNode("Shadow AI is everywhere. "));
+        const author = el("li", { class: "bc_news_author" });
+        author.textContent = "NUDGE SECURITY SPONSORSHIP";
+        const inner = el("ul");
+        inner.appendChild(author);
+        card.appendChild(inner);
+        card.style.cssText = "max-width:640px;min-height:72px;margin:12px auto;background:#eee;padding:8px;";
+        document.body.appendChild(card);
+      }, 4300);
     }
     const feed = document.getElementById("fb-feed");
     if (feed) {
