@@ -110,6 +110,8 @@ fbs-ad, .fbs-ad--top-wrapper, [class*="fbs-ad--"],
 .bc_right_sidebar a[href*="utm_medium=sponsor"],
 .featured-posts-banner, .featured-posts-banner-container,
 [class*="Content_SponsorSlug"],
+li.wdn-listv2-item:has(.listing__text--sponsored),
+li.wdn-listv2-item:has(.listing__text--sponsorship-disclaimer),
 [data-lab-ad] {
   display: none !important;
 }
@@ -263,6 +265,8 @@ fbs-ad, .fbs-ad--top-wrapper, [class*="fbs-ad--"],
     '[class*="Content_SponsorSlug"]',
     ".c-main-footer__ad-overlay",
     ".js-ad-footer",
+    "li.wdn-listv2-item:has(.listing__text--sponsored)",
+    "li.wdn-listv2-item:has(.listing__text--sponsorship-disclaimer)",
   ];
 
   const NAG_RE =
@@ -1016,6 +1020,35 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     }
   }
 
+  function hideWhoWhatWearSponsorCards() {
+    if (!enabled) return;
+    let nodes;
+    try {
+      nodes = document.querySelectorAll(
+        ".listing__text--sponsored, .listing__text--sponsorship-disclaimer"
+      );
+    } catch {
+      return;
+    }
+    for (const node of nodes) {
+      if (node.querySelector?.("video")?.videoWidth > 0) continue;
+      const text = (node.innerText || "").replace(/\s+/g, " ").trim();
+      if (!/^sponsor content created with\b/i.test(text) || text.length > 80) continue;
+      const card = node.closest("li.wdn-listv2-item");
+      if (!card || card === document.body) continue;
+      if (
+        card.matches?.(
+          "ul, ol, main, header, nav, footer, #main-content, .homepage, .main-content, .wdn-listv2-items, .wdn-listv2-item-lists, .wdn-listv2-item-wrapper"
+        )
+      ) {
+        continue;
+      }
+      if (/^(MAIN|SECTION|HEADER|NAV|FOOTER|UL|OL)$/i.test(card.tagName)) continue;
+      if (card.querySelector?.("video")?.videoWidth > 0) continue;
+      hideNode(card, true);
+    }
+  }
+
   function hideTacFooterAdOverlay() {
     if (!enabled) return;
     let nodes;
@@ -1324,6 +1357,7 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     hideIgnPromotedItems();
     hideThrillistPartnerCards();
     hideVg247SponsoredCards();
+    hideWhoWhatWearSponsorCards();
     hideTacFooterAdOverlay();
     hideSlashdotLeftovers();
     hideDigitalTrendsSponsored();

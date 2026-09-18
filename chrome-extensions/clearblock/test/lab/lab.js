@@ -840,6 +840,19 @@
         document.body.appendChild(header);
         document.body.appendChild(slot);
       }, 5500);
+      setTimeout(() => {
+        const list = el("ul", { class: "wdn-listv2-item-lists", "data-lab-content": "www-grid-delayed" });
+        list.style.cssText = "max-width:1200px;margin:12px auto;background:#fff;color:#111;padding:8px;list-style:none;display:flex;gap:12px;";
+        const organic = el("li", { class: "wdn-listv2-item", "data-lab-content": "www-editorial-delayed" });
+        organic.innerHTML = '<a class="wdn-listv2-item-link" href="#organic">How to Spot an Under-30 It Girl</a>';
+        const sponsored = el("li", { class: "wdn-listv2-item", "data-lab-ad": "www-sponsor-delayed" });
+        sponsored.style.cssText = "min-height:72px;background:#eee;padding:8px;";
+        sponsored.innerHTML =
+          '<div class="wdn-listv2-item-content"><p class="listing__text listing__text--sponsored py-2"><span class="listing__text--sponsorship-disclaimer">Sponsor Content Created With NET-A-PORTER</span></p></div>';
+        list.appendChild(organic);
+        list.appendChild(sponsored);
+        document.body.appendChild(list);
+      }, 5550);
     }
     const feed = document.getElementById("fb-feed");
     if (feed) {
