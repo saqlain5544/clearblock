@@ -97,6 +97,7 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
 #leader_middle, #leader_plus_top, #skybox_sticky, #intromercial,
 [data-ad-unit="leader_middle"], [data-ad="leader-middle"],
 [data-pogo], [data-pogo="main"], [data-pogo="footer"], [data-pogo="top"], [data-pogo="sidebar"],
+.begenuin-widget, .gen-sdk-class, [id^="gen-sdk"], [data-genuin-host],
 [data-lab-ad] {
   display: none !important;
 }
@@ -226,6 +227,10 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     '[data-pogo="footer"]',
     '[data-pogo="top"]',
     '[data-pogo="sidebar"]',
+    ".begenuin-widget",
+    ".gen-sdk-class",
+    '[id^="gen-sdk"]',
+    "[data-genuin-host]",
   ];
 
   const NAG_RE =
@@ -613,6 +618,28 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     }
   }
 
+  function hideBegeninSlots() {
+    if (!enabled) return;
+    let nodes;
+    try {
+      nodes = document.querySelectorAll(".begenuin-widget, .gen-sdk-class, [id^='gen-sdk'], [data-genuin-host]");
+    } catch {
+      return;
+    }
+    for (const node of nodes) {
+      const video = node.querySelector?.("video");
+      if (video && video.videoWidth > 0) continue;
+      const text = (node.innerText || "").replace(/\s+/g, " ").trim();
+      if (text.length > 80) continue;
+      hideNode(node, true);
+      const wrap = node.closest?.(".row-module-and-ad");
+      if (wrap && wrap !== node && !(wrap.querySelector?.("video")?.videoWidth > 0)) {
+        const wtext = (wrap.innerText || "").replace(/\s+/g, " ").trim();
+        if (wtext.length <= 40) hideNode(wrap, true);
+      }
+    }
+  }
+
   function hideBloombergAdSlots() {
     if (!enabled) return;
     let nodes;
@@ -715,6 +742,7 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     hideAdvertisingContentCards();
     hideBareAdLabels();
     hidePogoSlots();
+    hideBegeninSlots();
     hideBloombergAdSlots();
     hideSportsAdSlots();
     hideOptidigitalSlots();

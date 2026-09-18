@@ -462,6 +462,18 @@
         pogo.style.cssText = "display:grid;width:100%;min-height:72px;margin:12px auto;background:#f7f7f7;";
         document.body.appendChild(pogo);
       }, 3500);
+      setTimeout(() => {
+        const wrap = el("div", { class: "row-module-and-ad" });
+        const widget = el("div", {
+          id: "gen-sdk-delayed",
+          class: "begenuin-widget gen-sdk-class",
+          "data-genuin-host": "true",
+          "data-lab-ad": "usmagazine-begenuin-delayed",
+        });
+        widget.style.cssText = "width:100%;height:96px;margin:12px auto;background:#eee;";
+        wrap.appendChild(widget);
+        document.body.appendChild(wrap);
+      }, 3600);
     }
     const feed = document.getElementById("fb-feed");
     if (feed) {
