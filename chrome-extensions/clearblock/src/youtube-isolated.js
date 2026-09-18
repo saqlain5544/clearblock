@@ -161,6 +161,8 @@ ytm-promoted-sparkles-web-renderer,
     const t = video.currentTime || 0;
     const hasSkip = SKIP_SELECTORS.some((selector) => player.querySelector(selector));
     if (hasSkip && Number.isFinite(duration) && duration > 0 && duration <= 45 && t < 2) return true;
+    const overlay = player.querySelector(".ytp-ad-player-overlay, .ytp-ad-player-overlay-instream-info, .ytp-ad-text");
+    if (overlay && Number.isFinite(duration) && duration > 0 && duration <= 60 && t < 3) return true;
     return false;
   }
 
