@@ -129,7 +129,7 @@ iframe[id^="google_ads_iframe"],
   ];
 
   const NAG_RE =
-    /disable (your )?ad.?block|turn off (your )?ad.?block|whitelist (this|our|the) (site|ad)|allowlist .{0,48}|ad blockers? (are|is) not allowed|please (disable|turn off|whitelist).{0,24}ad.?block|allowed on youtube|allowing ads|using your ad blocker|continue using your ad blocker|support .{0,40}by allowing ads|ad or script blocking|script blocking software|interfering with this page|disable .{0,40}blocking software/i;
+    /disable (your |my |any )?ad.?block|disabl(?:e|ing) .{0,40}ad.?block|turn(?:ing)? off .{0,40}ad.?block|whitelist (this|our|the) (site|ad)|allowlist .{0,48}|ad blockers? (are|is) not allowed|please (disable|turn off|whitelist).{0,24}ad.?block|allowed on youtube|allowing ads|\ballow ads\b|using (an |your |a )?ad.?block|continue using your ad blocker|support .{0,40}by allowing ads|ad or script blocking|script blocking software|interfering with this page|disable .{0,40}blocking software|it looks like you.?re using an ad.?block|powered by admiral/i;
 
   const PROTECT_TAGS = new Set(["VIDEO", "AUDIO", "SOURCE", "TRACK", "CANVAS"]);
 

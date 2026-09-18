@@ -325,6 +325,24 @@
         fox.style.cssText = "position:fixed;left:0;right:0;bottom:40px;z-index:2147483586;background:#faf8e2;color:#111;padding:12px;text-align:center;";
         document.body.appendChild(fox);
       }, 1800);
+      setTimeout(() => {
+        const usa = el("div", {
+          class: "fEy1Z2XT",
+          "data-lab-ad": "usatoday-admiral-nag-delayed",
+          "data-anti-adblock": "1",
+        }, "It looks like you're using an adblocker. Please support us by turning off your adblocker. Disable my Adblocker.");
+        usa.style.cssText = "position:fixed;inset:0;z-index:2147483647;background:rgba(0,0,0,.4);color:#111;padding:16px;text-align:center;";
+        document.body.appendChild(usa);
+      }, 2000);
+      setTimeout(() => {
+        const imgur = el("div", {
+          class: "fEy1Z2XT",
+          "data-lab-ad": "imgur-admiral-nag-delayed",
+          "data-anti-adblock": "1",
+        }, "Ads keep Imgur's lights on. Allow Ads. Powered by Admiral.");
+        imgur.style.cssText = "position:fixed;inset:20% 24%;z-index:2147483646;background:#111;color:#fff;padding:16px;text-align:center;";
+        document.body.appendChild(imgur);
+      }, 2200);
     }
     const feed = document.getElementById("fb-feed");
     if (feed) {
