@@ -8,7 +8,7 @@
   let observer = null;
 
   const BOOTSTRAP_CSS = `
-.ad, .ads, .ad-banner, .ad-container, .ad-slot, .adbox, .adsbox,
+.ad, .ads, .ad-banner, .ad-container, .ad-slot, .adbox,
 .advert, .advertisement, .sponsored, .sponsored-slot, .sponsored-unit,
 .sponsor, .promo-ad, .promoted, .promoted-post,
 [id="ad"], [id="ads"], [id="ad-banner"], [class*="Ad-Container"],
@@ -35,10 +35,35 @@ ytd-rich-item-renderer:has(ytd-ad-slot-renderer),
 #masthead-ad, #player-ads, .ytp-ad-module, .video-ads,
 [class*="ytp-ad-"], .ytp-flyout-cta, .ytp-paid-content-overlay,
 .jw-ad, .video-js-ad, .ima-ad-container, .vast-ad,
-iframe[id^="google_ads"], iframe[src*="doubleclick"], iframe[src*="googlesyndication"] {
+iframe[id^="google_ads"], iframe[src*="doubleclick"], iframe[src*="googlesyndication"],
+.fc-ab-root, .fc-dialog, .fc-whitelist-blocking, [class^="fc-ab"],
+.adblock-wall, .adblock-overlay, .adblock-modal, .adb-overlay, .adb-wall,
+#adblock-notify, .please-disable-adblock, [class*="adblock-wall"],
+[id*="adblock-wall"], [class*="disable-adblock"], .anti-adblock, .antiadblock,
+[data-anti-adblock], .adblock-msg, .adblocker-msg, .ad-block-msg,
+#blockadblock, .blockadblock, .fuckadblock, .adsbox-clone,
+[data-lab-ad] {
   display: none !important;
 }
 `;
+
+  const EXTRA_HIDE = [
+    "[data-lab-ad]",
+    ".fc-ab-root",
+    ".fc-dialog",
+    ".adblock-wall",
+    ".adblock-overlay",
+    ".adblock-modal",
+    ".adb-overlay",
+    ".please-disable-adblock",
+    "[data-anti-adblock]",
+    "ytd-enforcement-message-view-model",
+  ];
+
+  const NAG_RE =
+    /disable (your )?ad.?block|turn off (your )?ad.?block|whitelist (this|our|the) (site|ad)|ad blockers? (are|is) not allowed|please (disable|turn off|whitelist).{0,24}ad.?block|allowed on youtube/i;
+
+  const PROTECT_TAGS = new Set(["VIDEO", "AUDIO", "SOURCE", "TRACK", "CANVAS"]);
 
   function injectCss(cssText, id) {
     if (!cssText || document.getElementById(id)) return;
@@ -49,14 +74,12 @@ iframe[id^="google_ads"], iframe[src*="doubleclick"], iframe[src*="googlesyndica
     if (root) root.appendChild(style);
   }
 
-  const PROTECT_TAGS = new Set(["VIDEO", "AUDIO", "SOURCE", "TRACK", "CANVAS"]);
-
   function isExplicitAdContainer(node) {
     if (!node || !node.matches) return false;
     try {
       if (
         node.matches(
-          '[data-lab-ad], ytd-ad-slot-renderer, ytd-display-ad-renderer, ytd-in-feed-ad-layout-renderer, ytd-promoted-sparkles-web-renderer, ytd-companion-slot-renderer, ytd-video-masthead-ad-v3-renderer, ytd-promoted-video-renderer, ins.adsbygoogle, .adsbygoogle, [id*="google_ads"], [id*="div-gpt-ad"], [class*="div-gpt-ad"], .OUTBRAIN, .taboola, [id^="taboola-"], .trc_rbox, [aria-label="Sponsored"], .fb-instream-ad, .ima-ad-container'
+          '[data-lab-ad], ytd-ad-slot-renderer, ytd-display-ad-renderer, ytd-in-feed-ad-layout-renderer, ytd-promoted-sparkles-web-renderer, ytd-companion-slot-renderer, ytd-video-masthead-ad-v3-renderer, ytd-promoted-video-renderer, ins.adsbygoogle, .adsbygoogle, [id*="google_ads"], [id*="div-gpt-ad"], [class*="div-gpt-ad"], .OUTBRAIN, .taboola, [id^="taboola-"], .trc_rbox, [aria-label="Sponsored"], .fb-instream-ad, .ima-ad-container, .adblock-wall, .fc-ab-root, [data-anti-adblock]'
         )
       ) {
         return true;
@@ -75,13 +98,23 @@ iframe[id^="google_ads"], iframe[src*="doubleclick"], iframe[src*="googlesyndica
     if (!node || node.nodeType !== 1) return true;
     if (PROTECT_TAGS.has(node.tagName)) return true;
     if (node.id === "movie_player" || node.classList?.contains("html5-video-player")) return true;
+    if (node.id === "clearblock-bait") return true;
     if (isExplicitAdContainer(node)) return false;
-    if (node.closest?.("[data-lab-ad], ytd-ad-slot-renderer, .fb-instream-ad, .ima-ad-container")) return false;
+    if (node.closest?.("[data-lab-ad], ytd-ad-slot-renderer, .fb-instream-ad, .ima-ad-container, .adblock-wall, .fc-ab-root")) {
+      return false;
+    }
     if (node.closest?.("video, audio, ytd-player, #movie_player, .html5-video-player, [data-lab-content='player']")) {
       return true;
     }
     if (node.querySelector?.("video, audio")) return true;
     return false;
+  }
+
+  function hideNode(node) {
+    if (!node || hidden.has(node) || isProtected(node)) return;
+    hidden.add(node);
+    node.style.setProperty("display", "none", "important");
+    hiddenCount += 1;
   }
 
   function hideMatches(selectors) {
@@ -93,14 +126,62 @@ iframe[id^="google_ads"], iframe[src*="doubleclick"], iframe[src*="googlesyndica
       } catch {
         continue;
       }
-      for (const node of nodes) {
-        if (hidden.has(node) || isProtected(node)) continue;
-        hidden.add(node);
-        node.style.setProperty("display", "none", "important");
-        hiddenCount += 1;
-      }
+      for (const node of nodes) hideNode(node);
     }
     flushCosmeticCount();
+  }
+
+  function dismissNags() {
+    if (!enabled) return;
+    const candidates = document.querySelectorAll(
+      "div, aside, section, dialog, [role='dialog'], [role='alertdialog']"
+    );
+    for (const node of candidates) {
+      if (hidden.has(node) || isProtected(node)) continue;
+      if (node.closest?.("[data-lab-content], #movie_player, video, article.web-article, .fb-post[data-lab-content]")) {
+        continue;
+      }
+      const text = (node.innerText || node.textContent || "").replace(/\s+/g, " ").slice(0, 420);
+      if (!NAG_RE.test(text)) continue;
+      const style = node.ownerDocument.defaultView.getComputedStyle(node);
+      const position = style.position;
+      const covers =
+        position === "fixed" ||
+        position === "sticky" ||
+        /modal|overlay|wall|dialog|paywall|adblock/i.test(`${node.className} ${node.id}`);
+      if (!covers) continue;
+      hideNode(node);
+    }
+    flushCosmeticCount();
+    const html = document.documentElement;
+    const body = document.body;
+    if (html && html.style.overflow === "hidden" && !document.querySelector(".adblock-wall:not([style*='display: none'])")) {
+      html.style.removeProperty("overflow");
+    }
+    if (body && body.style.overflow === "hidden") {
+      body.style.removeProperty("overflow");
+    }
+  }
+
+  function plantBait() {
+    if (document.getElementById("clearblock-bait")) return;
+    const root = document.documentElement || document.body;
+    if (!root) return;
+    const bait = document.createElement("div");
+    bait.id = "clearblock-bait";
+    bait.className = "adsbox";
+    bait.setAttribute("aria-hidden", "true");
+    bait.style.cssText = "position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden;";
+    bait.style.setProperty("display", "block", "important");
+    bait.style.setProperty("visibility", "visible", "important");
+    bait.style.setProperty("opacity", "1", "important");
+    root.appendChild(bait);
+  }
+
+  function sweep() {
+    hideMatches(EXTRA_HIDE);
+    hideMatches(specificSelectors);
+    dismissNags();
   }
 
   function flushCosmeticCount() {
@@ -118,10 +199,13 @@ iframe[id^="google_ads"], iframe[src*="doubleclick"], iframe[src*="googlesyndica
 
   function startObserver() {
     if (observer || !enabled) return;
-    observer = new MutationObserver(() => {
-      if (specificSelectors.length) hideMatches(specificSelectors);
-    });
-    observer.observe(document.documentElement, { childList: true, subtree: true });
+    const root = document.documentElement;
+    if (!root) {
+      document.addEventListener("DOMContentLoaded", startObserver, { once: true });
+      return;
+    }
+    observer = new MutationObserver(() => sweep());
+    observer.observe(root, { childList: true, subtree: true });
   }
 
   async function applySpecific(host) {
@@ -155,6 +239,7 @@ iframe[id^="google_ads"], iframe[src*="doubleclick"], iframe[src*="googlesyndica
     if (!enabled) return;
 
     injectCss(BOOTSTRAP_CSS, "clearblock-bootstrap");
+    plantBait();
     try {
       const css = await fetch(chrome.runtime.getURL("rules/cosmetic-generic.css")).then((res) => res.text());
       injectCss(css, "clearblock-generic");
@@ -164,10 +249,13 @@ iframe[id^="google_ads"], iframe[src*="doubleclick"], iframe[src*="googlesyndica
 
     await applySpecific(host);
     startObserver();
+    sweep();
+    setInterval(sweep, 1200);
     if (document.readyState === "loading") {
-      document.addEventListener("DOMContentLoaded", () => hideMatches(specificSelectors), { once: true });
-    } else {
-      hideMatches(specificSelectors);
+      document.addEventListener("DOMContentLoaded", () => {
+        plantBait();
+        sweep();
+      }, { once: true });
     }
   }
 

@@ -101,6 +101,6 @@ python3 -m http.server 43180 --bind 127.0.0.1
 # http://127.0.0.1:43180/test/lab/
 ```
 
-Each page paints a scoreboard: ad slots hidden vs leftover, and whether content video still plays. Network probes hit real ad hosts (they should fail with the extension on).
+Each page paints a scoreboard: ad slots hidden vs leftover, whether content video still plays, and whether the player was seeked or left frozen. The fixtures include delayed/obfuscated insertions and “disable your ad blocker” nags. Network probes hit real ad hosts (they should fail with the extension on).
 
 `test/youtube-player-lab.html` remains a focused preroll harness.

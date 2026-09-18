@@ -106,10 +106,12 @@
     const videos = scanVideo();
     const videoOk = videos.length === 0 || videos.some((v) => !v.error && (v.t > 0 || v.w > 0 || !v.paused));
     const adsOk = ads.visible === 0;
+    const health = scanPlayerHealth();
     el.innerHTML = `
       <span>${document.title}</span>
       <span class="${adsOk ? "ok" : "fail"}">Ads hidden <strong>${ads.hidden}/${ads.total}</strong> · leftover ${ads.visible}</span>
       <span class="${videoOk ? "ok" : "fail"}">Content video ${videoOk ? "playing" : "blocked/failed"}</span>
+      <span class="${health.ok ? "ok" : "fail"}">Player ${health.ok ? "unstuck" : health.soughtAway ? "seeked content" : "stuck"} · rate ${health.rate || "–"}</span>
       <span class="${netOk ? "ok" : ""}">${netLine}</span>
       ${extra || ""}
     `;
@@ -119,7 +121,7 @@
       fail.textContent = "Still visible: " + [...new Set(ads.leftover)].slice(0, 12).join(", ");
       el.appendChild(fail);
     }
-    const payload = { source: "clearblock-lab", href: location.href, ads, videos, videoOk, adsOk };
+    const payload = { source: "clearblock-lab", href: location.href, ads, videos, videoOk, adsOk, health };
     try {
       window.parent.postMessage(payload, "*");
     } catch {
@@ -274,10 +276,75 @@
     }
   }
 
+  function hydrateBypass() {
+    const mount = document.getElementById("web-bypass");
+    if (mount) {
+      setTimeout(() => {
+        const delayed = el("div", { class: "qx9zlm", "data-lab-ad": "delayed-obfuscated" }, "Delayed obfuscated creative inserted at 1.2s");
+        delayed.style.minHeight = "80px";
+        delayed.style.background = "#c81e1e";
+        delayed.style.color = "#fff";
+        delayed.style.padding = "12px";
+        mount.appendChild(delayed);
+      }, 1200);
+      setTimeout(() => {
+        const scripted = el("div", { class: "z-k2", role: "ad", "data-lab-ad": "scripted-first-party", "aria-label": "Advertisement" }, "Scripted first-party slot /sponsor.js");
+        scripted.style.minHeight = "72px";
+        scripted.style.background = "#8a1010";
+        scripted.style.color = "#fff";
+        scripted.style.padding = "12px";
+        mount.appendChild(scripted);
+      }, 2000);
+    }
+    const feed = document.getElementById("fb-feed");
+    if (feed) {
+      setTimeout(() => {
+        const post = el("article", {
+          class: "fb-post",
+          "data-lab-ad": "facebook-delayed",
+          "aria-label": "Sponsored",
+        });
+        post.innerHTML = "<header><strong>Delayed sponsored unit</strong><div>Sponsored · just now</div></header><div class='body'>Scripted insertion after the feed painted.</div>";
+        feed.appendChild(post);
+      }, 1500);
+    }
+    const grid = document.getElementById("yt-home-grid");
+    if (grid) {
+      setTimeout(() => {
+        const ad = el("ytd-ad-slot-renderer", { "data-lab-ad": "youtube-delayed", class: "yt-card" });
+        ad.appendChild(el("div", { class: "lab-fill" }, "Delayed in-feed ad after homepage paint"));
+        grid.appendChild(ad);
+      }, 1400);
+    }
+  }
+
+  function scanPlayerHealth() {
+    const video = document.querySelector("[data-lab-content='player'] video, video.html5-main-video");
+    if (!video) return { ok: true, detail: "no player" };
+    const rate = video.playbackRate || 1;
+    const expected = window.__labExpectedRate;
+    const rateOk = expected ? Math.abs(rate - expected) < 0.05 || rate === 1 : rate > 0 && rate <= 2;
+    const stuck = video.paused && !video.ended && video.readyState >= 2 && video.currentTime === 0 && video.videoWidth === 0;
+    const soughtAway =
+      Number.isFinite(video.duration) &&
+      video.duration > 12 &&
+      video.currentTime >= video.duration - 0.05 &&
+      video.paused;
+    return {
+      ok: !stuck && !soughtAway && rateOk,
+      rate,
+      paused: video.paused,
+      t: video.currentTime,
+      stuck,
+      soughtAway,
+    };
+  }
+
   async function boot() {
     hydrateYouTube();
     hydrateFacebook();
     hydrateWeb();
+    hydrateBypass();
     firePixels();
     const first = paintScoreboard();
     probeNetwork().then((rows) => {

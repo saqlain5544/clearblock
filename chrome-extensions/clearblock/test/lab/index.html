@@ -44,7 +44,7 @@
         const rows = Object.values(reports);
         const ads = rows.reduce((n, r) => n + (r.ads?.visible || 0), 0);
         const total = rows.reduce((n, r) => n + (r.ads?.total || 0), 0);
-        const videosOk = rows.every((r) => r.videoOk !== false);
+        const videosOk = rows.every((r) => r.videoOk !== false && r.health?.ok !== false);
         document.getElementById("agg").innerHTML =
           `<strong>${ads === 0 ? "PASS" : "LEAK"}</strong> · ${total - ads}/${total} ad slots hidden · leftover ${ads} · content video ${videosOk ? "ok" : "FAIL"}`;
         document.getElementById("agg").style.color = ads === 0 && videosOk ? "#3ee0b2" : "#ff8b8b";

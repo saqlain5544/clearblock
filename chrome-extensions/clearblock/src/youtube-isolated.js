@@ -11,6 +11,19 @@
     ".ytp-ad-skip-button-slot button",
   ];
 
+  const WALL_SELECTORS = [
+    "ytd-enforcement-message-view-model",
+    "tp-yt-paper-dialog:has(ytd-enforcement-message-view-model)",
+    ".yt-playability-error-supported-renderers",
+    "ytd-popup-container:has(ytd-enforcement-message-view-model)",
+  ];
+
+  const NAG_RE =
+    /ad blockers? (are|is) not allowed|disable (your )?ad.?block|turn off (your )?ad.?block|whitelist (this|our) (site|ad)|allowed on youtube/i;
+
+  const AD_SRC_RE =
+    /[?&](oad=1|ctier=L|ctia=)|\/pagead|doubleclick|googlesyndication|\/ptracking|\/api\/stats\/ads/i;
+
   const HIDE_CSS = `
 #masthead-ad,
 #player-ads,
@@ -33,7 +46,6 @@ ytd-rich-item-renderer:has(ytd-ad-slot-renderer),
 ytd-reel-video-renderer:has(ytd-ad-slot-renderer),
 ytd-compact-promoted-video-renderer,
 ytd-ad-hovercard-button-renderer,
-ytd-promoted-sparkles-web-renderer,
 ad-slot-renderer,
 .ytp-ad-overlay-slot,
 .ytp-ad-text-overlay,
@@ -66,21 +78,15 @@ tp-yt-paper-dialog.ytd-popup-container ytd-mealbar-promo-renderer,
 ytd-engagement-panel-section-list-renderer[target-id="engagement-panel-ads"],
 ytd-enforcement-message-view-model,
 tp-yt-paper-dialog:has(ytd-enforcement-message-view-model),
-.ytp-error:has(.ytp-error-content-wrap-reason),
 ytm-promoted-sparkles-text-search-renderer,
 ytm-promoted-sparkles-web-renderer,
 .ytd-watch-flexy ytd-ad-slot-renderer,
 .ytp-suggested-action {
   display: none !important;
 }
-.html5-video-player.ad-showing .html5-video-container,
-#movie_player.ad-showing .html5-video-container {
-  visibility: hidden !important;
-}
 .html5-video-player.ad-showing .ytp-chrome-top,
 #movie_player.ad-showing .ytp-chrome-top,
 .html5-video-player.ad-showing .ytp-cards-teaser,
-.html5-video-player.ad-showing .ytp-skip-ad,
 .html5-video-player.ad-showing [class*="ytp-ad-"] {
   display: none !important;
   opacity: 0 !important;
@@ -93,6 +99,8 @@ ytm-promoted-sparkles-web-renderer,
   let savedMuted = false;
   let holdingAd = false;
   let heldVideo = null;
+  let soughtThisAd = false;
+  let savedTime = 0;
 
   function report(kind) {
     const now = Date.now();
@@ -139,13 +147,56 @@ ytm-promoted-sparkles-web-renderer,
     }
   }
 
-  function dismissAntiAdblock() {
-    const wall = document.querySelector("ytd-enforcement-message-view-model, tp-yt-paper-dialog:has(ytd-enforcement-message-view-model)");
-    if (wall) {
-      wall.remove();
-      const video = document.querySelector("#movie_player video, video.html5-main-video");
-      if (video && video.paused) video.play().catch(() => {});
+  function isLabContentVideo(video) {
+    if (!video || !video.closest) return false;
+    return Boolean(video.closest("[data-lab-content='player'], .lab-content-player"));
+  }
+
+  function isLikelyInstreamAd(player, video) {
+    if (!player || !video) return false;
+    if (isLabContentVideo(video)) return false;
+    const src = video.currentSrc || video.src || "";
+    if (AD_SRC_RE.test(src)) return true;
+    const duration = video.duration;
+    const t = video.currentTime || 0;
+    const hasSkip = SKIP_SELECTORS.some((selector) => player.querySelector(selector));
+    if (hasSkip && Number.isFinite(duration) && duration > 0 && duration <= 45 && t < 2) return true;
+    return false;
+  }
+
+  function playIfStuck(video) {
+    if (!video) return;
+    try {
+      if (video.paused && !video.ended && video.readyState >= 2) {
+        video.play().catch(() => {});
+      }
+    } catch {
+      // Player swapped the element.
     }
+  }
+
+  function dismissAntiAdblock() {
+    for (const selector of WALL_SELECTORS) {
+      let nodes;
+      try {
+        nodes = document.querySelectorAll(selector);
+      } catch {
+        continue;
+      }
+      for (const wall of nodes) {
+        wall.remove();
+        report("hide");
+      }
+    }
+    for (const node of document.querySelectorAll(".ytp-error, tp-yt-paper-dialog, ytd-popup-container")) {
+      const text = (node.textContent || "").slice(0, 400);
+      if (NAG_RE.test(text)) {
+        node.remove();
+        report("hide");
+      }
+    }
+    const video = document.querySelector("#movie_player video, video.html5-main-video");
+    playIfStuck(video);
   }
 
   function restoreContent() {
@@ -153,11 +204,22 @@ ytm-promoted-sparkles-web-renderer,
     const video = heldVideo || document.querySelector("video.html5-main-video, #movie_player video, video");
     holdingAd = false;
     heldVideo = null;
+    soughtThisAd = false;
     if (!video) return;
     try {
       const rate = savedRate > 0 && savedRate <= 2 ? savedRate : 1;
       video.playbackRate = rate;
       video.muted = savedMuted;
+      if (
+        Number.isFinite(savedTime) &&
+        savedTime > 1 &&
+        Number.isFinite(video.duration) &&
+        video.currentTime >= video.duration - 0.2 &&
+        savedTime < video.duration - 0.5
+      ) {
+        video.currentTime = savedTime;
+      }
+      playIfStuck(video);
     } catch {
       // Player may already have swapped the element.
     }
@@ -177,8 +239,10 @@ ytm-promoted-sparkles-web-renderer,
       const rate = video.playbackRate || 1;
       savedRate = rate > 0 && rate <= 2 ? rate : 1;
       savedMuted = video.muted;
+      savedTime = video.currentTime || 0;
       holdingAd = true;
       heldVideo = video;
+      soughtThisAd = false;
     }
     clickSkips(player);
     if (!player.classList.contains("ad-showing")) {
@@ -186,13 +250,21 @@ ytm-promoted-sparkles-web-renderer,
       report("skip");
       return;
     }
+    if (!isLikelyInstreamAd(player, video)) {
+      player.classList.remove("ad-showing");
+      restoreContent();
+      playIfStuck(video);
+      report("skip");
+      return;
+    }
     try {
       video.muted = true;
-      if (Number.isFinite(video.duration) && video.duration > 0) {
+      if (!soughtThisAd && Number.isFinite(video.duration) && video.duration > 0) {
         if (video.currentTime < video.duration - 0.05) {
           video.currentTime = video.duration;
+          soughtThisAd = true;
         }
-      } else {
+      } else if (!soughtThisAd) {
         video.playbackRate = 16;
       }
       report("skip");
@@ -231,6 +303,8 @@ ytm-promoted-sparkles-web-renderer,
         attributes: true,
         attributeFilter: ["class"],
       });
+    } else {
+      document.addEventListener("DOMContentLoaded", init, { once: true });
     }
   }
 

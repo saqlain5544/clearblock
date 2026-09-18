@@ -7,7 +7,8 @@
   const PLAYER_URL =
     /\/youtubei\/v1\/(?:player|next|get_watch|browse|search|reel\/reel_item_watch|reel\/reel_watch_sequence)|\/(?:watch|playlist)\?|\/get_watch\?/i;
 
-  const AD_KEY_RE = /"(adPlacements|adSlots|playerAds|adBreakHeartbeatParams)"/g;
+  const AD_KEY_RE =
+    /"(adPlacements|adSlots|playerAds|adBreakHeartbeatParams|playerAdvertisement|adBreaks)"/g;
 
   const AD_RENDERER_RE =
     /"(adSlotRenderer|adsEngagementPanelContentRenderer|bannerPromoRenderer|displayAdRenderer|endScreenAdRenderer|filmstripAdRenderer|inFeedAdLayoutRenderer|instreamVideoAdRenderer|playerLegacyDesktopWatchAdsRenderer|promotedSparklesTextSearchRenderer|promotedSparklesWebRenderer|promotedVideoRenderer|reelPlayerAdRenderer|adActionInterstitialRenderer)"/g;

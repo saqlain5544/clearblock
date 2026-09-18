@@ -109,6 +109,8 @@ MEDIA_ALLOW_DOMAINS = [
     "cloudflarestream.com",
     "mux.com",
     "mux.dev",
+    "mozilla.net",
+    "mozilla.org",
 ]
 
 MEDIA_ALLOW_PATHS = [
@@ -242,6 +244,8 @@ YOUTUBE_AND_CORE = [
     "||googletagmanager.com/gtag/js?id=AW",
     "||google-analytics.com^",
     "||facebook.com/tr",
+    "||fundingchoicesmessages.google.com^",
+    "||fundingchoices.google.com^",
 ]
 
 KEYWORD_RE = re.compile(

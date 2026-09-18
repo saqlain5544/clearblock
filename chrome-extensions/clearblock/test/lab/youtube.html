@@ -41,7 +41,7 @@
           <div>
             <div id="movie_player" class="html5-video-player ad-showing">
               <div class="html5-video-container lab-content-player" data-lab-content="player">
-                <video class="html5-main-video" muted playsinline src="../sample.mp4"></video>
+                <video class="html5-main-video" muted playsinline loop src="../sample.mp4"></video>
               </div>
               <div class="ytp-ad-module video-ads">
                 <div class="ytp-ad-player-overlay">Ad 1 of 2 · Visit advertiser</div>
@@ -79,6 +79,9 @@
       </main>
     </div>
     <ytd-enforcement-message-view-model class="lab-fill" data-lab-ad="youtube-enforcement">Ad blockers are not allowed on YouTube</ytd-enforcement-message-view-model>
+    <div class="adblock-wall please-disable-adblock lab-fill" data-lab-ad="youtube-nag" data-anti-adblock="1" style="position:fixed;inset:0;z-index:90;">
+      Ad blockers are not allowed on YouTube. Disable your ad blocker to continue watching.
+    </div>
     <script>
       window.ytInitialPlayerResponse = {
         videoDetails: { videoId: "labAlpine", title: "Night train through the Alps" },
@@ -87,6 +90,8 @@
         adSlots: [{ getMidroll: true }],
         playerAds: [{ instreamVideoAdRenderer: { skippable: true } }],
         adBreakHeartbeatParams: { ping: true },
+        playerAdvertisement: { instream: true },
+        adBreaks: [{ offset: 30 }],
       };
       window.ytInitialData = {
         contents: {
@@ -98,10 +103,10 @@
       };
       const player = document.getElementById("movie_player");
       const video = player.querySelector("video");
+      video.playbackRate = 1.25;
+      window.__labExpectedRate = 1.25;
       player.querySelector(".ytp-ad-skip-button-modern").addEventListener("click", () => {
         player.classList.remove("ad-showing");
-        video.currentTime = 0;
-        video.muted = true;
         video.play();
       });
       video.addEventListener("ended", () => {
@@ -112,11 +117,9 @@
         }
       });
       setTimeout(() => {
-        if (!player.classList.contains("ad-showing")) {
-          player.classList.add("ad-showing");
-          const overlay = document.querySelector(".ytp-ad-player-overlay");
-          if (overlay) overlay.textContent = "Ad 2 of 2 · Mid-roll";
-        }
+        player.classList.add("ad-showing");
+        const overlay = document.querySelector(".ytp-ad-player-overlay");
+        if (overlay) overlay.textContent = "Ad 2 of 2 · Mid-roll";
       }, 2800);
     </script>
     <script src="lab.js"></script>

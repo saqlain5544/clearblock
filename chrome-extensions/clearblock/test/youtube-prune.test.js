@@ -27,6 +27,8 @@ const playerJson = JSON.stringify({
   adSlots: [{ getMidroll: true }],
   playerAds: [{ instreamVideoAdRenderer: {} }],
   adBreakHeartbeatParams: { ping: true },
+  playerAdvertisement: { instream: true },
+  adBreaks: [{ offset: 15 }],
   contents: {
     twoColumnWatchNextResults: {
       results: {
@@ -52,7 +54,8 @@ assert(!renamed.includes('"adPlacements"'), "adPlacements key gone");
 assert(!renamed.includes('"adSlots"'), "adSlots key gone");
 assert(renamed.includes('"serverAbrStreamingUrl":"https://googlevideo.com/videoplayback?id=1"'), "streaming URL unchanged");
 assert(renamed.includes('"videoId":"abc"'), "video id unchanged");
-assert(!renamed.includes('"adSlotRenderer"'), "ad renderer keys renamed");
+assert(!renamed.includes('"playerAdvertisement"'), "playerAdvertisement key gone");
+assert(!renamed.includes('"adBreaks"'), "adBreaks key gone");
 
 const parsed = JSON.parse(playerJson);
 prune.prunePlayerObject(parsed, 0);
