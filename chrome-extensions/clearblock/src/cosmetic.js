@@ -104,6 +104,7 @@ a.zd-featured-deals__card[data-zd-track-item-name^="sponsored:"],
 .zd-featured-deals__card[data-zd-track-item-name^="sponsored:"],
 .fairplay-container, .fairplay-container.Offer, [data-qa="fair-play-component"],
 oc-connect-widget,
+fbs-ad, .fbs-ad--top-wrapper, [class*="fbs-ad--"],
 [data-lab-ad] {
   display: none !important;
 }
@@ -245,6 +246,9 @@ oc-connect-widget,
     ".fairplay-container.Offer",
     '[data-qa="fair-play-component"]',
     "oc-connect-widget",
+    "fbs-ad",
+    ".fbs-ad--top-wrapper",
+    '[class*="fbs-ad--"]',
   ];
 
   const NAG_RE =
@@ -266,7 +270,7 @@ oc-connect-widget,
     try {
       if (
         node.matches(
-          '[data-lab-ad], ytd-ad-slot-renderer, ytd-display-ad-renderer, ytd-in-feed-ad-layout-renderer, ytd-promoted-sparkles-web-renderer, ytd-companion-slot-renderer, ytd-video-masthead-ad-v3-renderer, ytd-promoted-video-renderer, ins.adsbygoogle, .adsbygoogle, [id*="google_ads"], [id*="div-gpt-ad"], [class*="div-gpt-ad"], .OUTBRAIN, .taboola, [id^="taboola-"], .trc_rbox, [aria-label="Sponsored"], .fb-instream-ad, .ima-ad-container, .adblock-wall, .fc-ab-root, [data-anti-adblock], .s-item--ad, .AdHolder, .sbv-video-container, .puis-sponsored-label-text'
+          '[data-lab-ad], ytd-ad-slot-renderer, ytd-display-ad-renderer, ytd-in-feed-ad-layout-renderer, ytd-promoted-sparkles-web-renderer, ytd-companion-slot-renderer, ytd-video-masthead-ad-v3-renderer, ytd-promoted-video-renderer, fbs-ad, ins.adsbygoogle, .adsbygoogle, [id*="google_ads"], [id*="div-gpt-ad"], [class*="div-gpt-ad"], .OUTBRAIN, .taboola, [id^="taboola-"], .trc_rbox, [aria-label="Sponsored"], .fb-instream-ad, .ima-ad-container, .adblock-wall, .fc-ab-root, [data-anti-adblock], .s-item--ad, .AdHolder, .sbv-video-container, .puis-sponsored-label-text'
         )
       ) {
         return true;
@@ -576,7 +580,7 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
 
   function hideBareAdLabels() {
     if (!enabled) return;
-    const nodes = document.querySelectorAll("span, div, small, p, aside, figcaption, section");
+    const nodes = document.querySelectorAll("span, div, small, p, aside, figcaption, section, fbs-ad");
     for (const node of nodes) {
       const text = (node.textContent || "").replace(/\s+/g, " ").trim();
       const before = pseudoContent(node, "::before");
@@ -722,6 +726,30 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     }
   }
 
+  function hideForbesAdSlots() {
+    if (!enabled) return;
+    let nodes;
+    try {
+      nodes = document.querySelectorAll("fbs-ad, .fbs-ad--top-wrapper, [class*='fbs-ad--']");
+    } catch {
+      return;
+    }
+    for (const node of nodes) {
+      if (node.querySelector?.("video")?.videoWidth > 0) continue;
+      hideNode(node, true);
+      const wrap = node.parentElement;
+      if (!wrap || wrap === document.body) continue;
+      if (/^(MAIN|ARTICLE|HEADER|NAV|FOOTER)$/i.test(wrap.tagName)) continue;
+      if (wrap.querySelector?.("video")?.videoWidth > 0) continue;
+      const wcls = typeof wrap.className === "string" ? wrap.className : wrap.getAttribute?.("class") || "";
+      const wtext = (wrap.innerText || "").replace(/\s+/g, " ").trim();
+      if (/billionaires|money & markets|daily cover|read the full story/i.test(wtext) && wtext.length > 80) continue;
+      if (/fbs-ad/i.test(wcls) && (wtext.length < 80 || /^(advertisement)?$/i.test(wtext))) {
+        hideNode(wrap, true);
+      }
+    }
+  }
+
   function hideBloombergAdSlots() {
     if (!enabled) return;
     let nodes;
@@ -827,6 +855,7 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     hideBegeninSlots();
     hideCNetSponsoredDeals();
     hideFoxSportsBetOffers();
+    hideForbesAdSlots();
     hideBloombergAdSlots();
     hideSportsAdSlots();
     hideOptidigitalSlots();

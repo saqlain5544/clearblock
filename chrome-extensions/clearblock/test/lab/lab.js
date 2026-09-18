@@ -499,6 +499,16 @@
         offer.style.cssText = "width:300px;min-height:72px;margin:12px auto;background:#111;color:#fff;padding:8px;";
         document.body.appendChild(offer);
       }, 3800);
+      setTimeout(() => {
+        const slot = el("fbs-ad", {
+          class: "CzQHt",
+          "data-lab-ad": "forbes-fbs-ad-delayed",
+          position: "topx",
+        });
+        slot.textContent = "ADVERTISEMENT";
+        slot.style.cssText = "display:block;min-height:28px;margin:12px auto;color:#999;letter-spacing:.2em;text-align:center;";
+        document.body.appendChild(slot);
+      }, 3900);
     }
     const feed = document.getElementById("fb-feed");
     if (feed) {
