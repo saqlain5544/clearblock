@@ -539,6 +539,17 @@
         document.body.appendChild(aside);
       }, 4200);
       setTimeout(() => {
+        const aside = el("aside", { class: "bc_right_sidebar" });
+        const a = el("a", {
+          href: "https://ztw.com/?utm_source=bleeping_computer&utm_medium=sponsor",
+          "data-lab-ad": "bc-sponsor-banner-delayed",
+        });
+        a.textContent = "ThreatLocker leftover banner";
+        a.style.cssText = "display:block;min-height:48px;margin:12px auto;background:#111;color:#fff;padding:8px;";
+        aside.appendChild(a);
+        document.body.appendChild(aside);
+      }, 4250);
+      setTimeout(() => {
         const card = el("li", { "data-lab-ad": "bc-sponsorship-delayed" });
         card.appendChild(document.createTextNode("Shadow AI is everywhere. "));
         const author = el("li", { class: "bc_news_author" });

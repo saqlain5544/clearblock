@@ -107,6 +107,7 @@ oc-connect-widget,
 fbs-ad, .fbs-ad--top-wrapper, [class*="fbs-ad--"],
 .body-cheat__identifier--branded,
 .bc_right_sidebar a[href*="/rd/"],
+.bc_right_sidebar a[href*="utm_medium=sponsor"],
 [data-lab-ad] {
   display: none !important;
 }
@@ -253,6 +254,7 @@ fbs-ad, .fbs-ad--top-wrapper, [class*="fbs-ad--"],
     '[class*="fbs-ad--"]',
     ".body-cheat__identifier--branded",
     '.bc_right_sidebar a[href*="/rd/"]',
+    '.bc_right_sidebar a[href*="utm_medium=sponsor"]',
   ];
 
   const NAG_RE =
@@ -767,6 +769,19 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
       if (wtext.length > 500) continue;
       hideNode(wrap, true);
     }
+    let headings;
+    try {
+      headings = document.querySelectorAll("h1, h2, h3, h4, div, section, header");
+    } catch {
+      headings = [];
+    }
+    for (const node of headings) {
+      const text = (node.innerText || "").replace(/\s+/g, " ").trim();
+      if (!/^partner content$/i.test(text)) continue;
+      if (node.querySelector?.("video")?.videoWidth > 0) continue;
+      if (node.querySelector?.("article")) continue;
+      hideNode(node, true);
+    }
   }
 
   function hideDailyBeastPartnerCards() {
@@ -793,23 +808,38 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     if (!enabled) return;
     let banners;
     try {
-      banners = document.querySelectorAll(".bc_right_sidebar a[href*='/rd/']");
+      banners = document.querySelectorAll(
+        ".bc_right_sidebar a[href*='/rd/'], .bc_right_sidebar a[href*='utm_medium=sponsor']"
+      );
     } catch {
       banners = [];
     }
     for (const a of banners) {
       if (a.querySelector?.("video")?.videoWidth > 0) continue;
       hideNode(a, true);
-      const wrap = a.parentElement;
-      if (!wrap || wrap === document.body) continue;
-      const wcls = typeof wrap.className === "string" ? wrap.className : wrap.getAttribute?.("class") || "";
-      if (/bc_right_sidebar|bc_main_content|bc_wrapper|container|row/i.test(wcls)) continue;
-      if (/^(MAIN|ARTICLE|HEADER|NAV|FOOTER)$/i.test(wrap.tagName)) continue;
-      if (wrap.querySelector?.("video")?.videoWidth > 0) continue;
-      const wtext = (wrap.innerText || "").replace(/\s+/g, " ").trim();
-      if (/popular stories|latest articles/i.test(wtext)) continue;
-      if (wtext.length > 80) continue;
-      hideNode(wrap, true);
+      let wrap = a.parentElement;
+      for (let i = 0; i < 3 && wrap && wrap !== document.body; i += 1) {
+        const wcls = typeof wrap.className === "string" ? wrap.className : wrap.getAttribute?.("class") || "";
+        const wid = wrap.id || "";
+        if (/bc_right_sidebar|bc_main_content|bc_wrapper|container|\brow\b|pop_stories/i.test(wcls + " " + wid)) break;
+        if (/^(MAIN|ARTICLE|HEADER|NAV|FOOTER)$/i.test(wrap.tagName)) break;
+        if (wrap.querySelector?.("video")?.videoWidth > 0) break;
+        const wtext = (wrap.innerText || "").replace(/\s+/g, " ").trim();
+        if (/popular stories|latest articles/i.test(wtext)) break;
+        if (wtext.length > 80) break;
+        hideNode(wrap, true);
+        wrap = wrap.parentElement;
+      }
+    }
+    try {
+      for (const n of document.querySelectorAll(".bc_right_sidebar > div")) {
+        if ((n.id || "") === "pop_stories") continue;
+        if (n.querySelector?.("video")?.videoWidth > 0) continue;
+        const t = (n.innerText || "").replace(/\s+/g, " ").trim();
+        if (/^sponsor posts$/i.test(t)) hideNode(n, true);
+      }
+    } catch {
+      /* ignore */
     }
     let authors;
     try {
