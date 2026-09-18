@@ -2,7 +2,7 @@
 
 Local-first **Manifest V3** Chrome extension that blocks ads in the browser. Filter lists ship inside the package, so it works offline. There is no account, no backend, and no required remote update.
 
-On a Mac the unpacked folder belongs at **`~/chrome-extensions/clearblock`**. This repo is a cloud checkout, so that path does not exist on your Mac until you copy the extension there (script below).
+On a Mac the unpacked folder belongs at **`~/chrome-extensions/clearblock`**. Install it by cloning this GitHub repo (script below).
 
 Blocking is a mix of:
 
@@ -21,21 +21,27 @@ Counts and settings live in `chrome.storage.local` on this device and survive Ch
 
 The folder Chrome loads is `chrome-extensions/clearblock` in this repo (the directory that contains `manifest.json`).
 
-1. Clone or download this repository onto the Mac.
-2. From the repo root:
+Paste this in Terminal. Set `REPO_URL` to the GitHub clone URL of this project:
 
-   ```bash
-   bash scripts/install-to-chrome-extensions.sh
-   ```
+```bash
+REPO_URL='https://github.com/YOU/clearblock.git'   # replace with this repo
+WORKDIR="$(mktemp -d)"
+git clone --depth 1 --filter=blob:none --sparse "$REPO_URL" "$WORKDIR"
+git -C "$WORKDIR" sparse-checkout set chrome-extensions/clearblock
+mkdir -p ~/chrome-extensions
+rm -rf ~/chrome-extensions/clearblock
+cp -R "$WORKDIR/chrome-extensions/clearblock" ~/chrome-extensions/clearblock
+rm -rf "$WORKDIR"
+echo "Installed ~/chrome-extensions/clearblock"
+```
 
-   That copies the unpacked extension to **`~/chrome-extensions/clearblock`**.
+If you already have a clone of this repo:
 
-   Or copy it yourself:
+```bash
+bash scripts/install-from-git.sh "$(git remote get-url origin)"
+```
 
-   ```bash
-   mkdir -p ~/chrome-extensions
-   cp -R chrome-extensions/clearblock ~/chrome-extensions/clearblock
-   ```
+That leaves the unpacked extension at **`~/chrome-extensions/clearblock`**.
 
 ## Load unpacked in Chrome
 
