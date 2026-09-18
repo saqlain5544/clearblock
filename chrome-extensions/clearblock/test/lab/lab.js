@@ -586,6 +586,34 @@
         side.appendChild(slot);
         document.body.appendChild(side);
       }, 4600);
+      setTimeout(() => {
+        const ul = el("ul", { class: "styles_unorderedList__ED1tF", "data-lab-content": "target-wellness-carousel-delayed" });
+        ul.style.cssText = "display:flex;gap:12px;max-width:1180px;margin:12px auto;list-style:none;padding:0;background:#fff;color:#111;";
+        const organic = el("li", { class: "styles_ndsCarouselItem__REyk3", "data-lab-content": "target-organic-tile-delayed" });
+        const organicCard = el("div", { "data-test": "item-card-organic-delayed" });
+        const organicLink = el("a", { "data-test": "item-link" });
+        organicLink.textContent = "Clean Simple Eats Protein Powder · $29.99";
+        organicCard.appendChild(organicLink);
+        organic.appendChild(organicCard);
+        const sponsored = el("li", {
+          class: "styles_ndsCarouselItem__REyk3",
+          "data-lab-ad": "target-homepage-sponsored-delayed",
+        });
+        const card = el("div", {
+          "data-test": "item-card-1011942840-delayed",
+          class: "styles_ndsCard__eTjRe styles_carouselTileWrapper__QmFaj",
+        });
+        const link = el("a", { "data-test": "item-link", class: "styles_productTileLink__lwb3Y" });
+        link.appendChild(document.createTextNode("FED Fitness Pilates Reformer · $119.99 "));
+        const slug = el("p", { class: "h-text-sm h-margin-t-tiny" });
+        slug.textContent = "Sponsored";
+        link.appendChild(slug);
+        card.appendChild(link);
+        sponsored.appendChild(card);
+        ul.appendChild(organic);
+        ul.appendChild(sponsored);
+        document.body.appendChild(ul);
+      }, 4700);
     }
     const feed = document.getElementById("fb-feed");
     if (feed) {

@@ -504,12 +504,16 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
   function hideRetailSponsored() {
     if (!enabled) return;
     const nodes = document.querySelectorAll(
-      "[data-test='container-cdui-item-wrapper'], [data-test='text-quill-insert-0'], .attribution-text-l, .s-widget-sponsored-label-text, .puis-sponsored-label-text, [class*='ad-feedback-text'], [class*='adFeedback'], [data-testid='sponsored-tag'], .ProductTile-content span, [data-comp*='ProductTile'] span, [data-comp*='ProductTile']"
+      "[data-test='container-cdui-item-wrapper'], [data-test='text-quill-insert-0'], .attribution-text-l, .s-widget-sponsored-label-text, .puis-sponsored-label-text, [class*='ad-feedback-text'], [class*='adFeedback'], [data-testid='sponsored-tag'], .ProductTile-content span, [data-comp*='ProductTile'] span, [data-comp*='ProductTile'], p.h-text-sm.h-margin-t-tiny, [data-test='item-link'] p"
     );
     for (const node of nodes) {
       const text = (node.innerText || "").replace(/\s+/g, " ").trim();
       if (!/^sponsored\b/i.test(text)) continue;
+      const itemCard = node.closest("[data-test^='item-card-']");
+      const carouselItem = itemCard?.closest("li") || node.closest("[data-test='item-link']")?.closest("li");
       const card =
+        carouselItem ||
+        itemCard ||
         node.closest("[data-comp*='ProductTile']") ||
         node.closest("[data-sponsored-id]") ||
         node.closest(".atwb-carousel") ||
@@ -521,9 +525,10 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
         node.closest("a[data-test='content']") ||
         node.closest("[data-test='container-cdui']") ||
         node.parentElement;
-      if (card && !card.querySelector?.("video.html5-main-video, #movie_player")) {
-        hideNode(card, true);
-      }
+      if (!card || card === document.body) continue;
+      if (/^(MAIN|ARTICLE|HEADER|NAV|FOOTER|UL|OL)$/i.test(card.tagName)) continue;
+      if (card.querySelector?.("video.html5-main-video, #movie_player")) continue;
+      hideNode(card, true);
     }
   }
 
