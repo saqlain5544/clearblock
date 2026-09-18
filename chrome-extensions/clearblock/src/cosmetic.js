@@ -952,6 +952,55 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     }
   }
 
+  function hideDigitalTrendsSponsored() {
+    if (!enabled) return;
+    let nodes;
+    try {
+      nodes = document.querySelectorAll(".b-sponsor, .b-right-rail-item__sponsor");
+    } catch {
+      return;
+    }
+    for (const node of nodes) {
+      if (node.querySelector?.("video")?.videoWidth > 0) continue;
+      const text = (node.innerText || "").replace(/\s+/g, " ").trim();
+      if (text && !/^sponsored\b/i.test(text) && text.length > 80) continue;
+      const card = node.closest(".b-right-rail-item");
+      if (!card || card === document.body) continue;
+      if (card.matches?.(".b-right-rail, .b-right-rail__inner, section, main, header, nav, footer")) continue;
+      if (card.querySelector?.("video")?.videoWidth > 0) continue;
+      hideNode(card, true);
+    }
+  }
+
+  function hideNatGeoPaidContent() {
+    if (!enabled) return;
+    let nodes;
+    try {
+      nodes = document.querySelectorAll(".TextBadge.promoted, .ListItem__TagWrapper, .label");
+    } catch {
+      return;
+    }
+    for (const node of nodes) {
+      if (node.querySelector?.("video")?.videoWidth > 0) continue;
+      const text = (node.innerText || "").replace(/\s+/g, " ").trim();
+      if (!/^paid content$/i.test(text)) continue;
+      const card =
+        node.closest(".HomepagePromos__promo") ||
+        node.closest(".ListItemWrapper") ||
+        node.closest(".ListItem");
+      if (!card || card === document.body) continue;
+      if (
+        card.matches?.(
+          ".HomepagePromos__row, .HomepagePromos, .GridListContainer, .PageLayout__Main, main, header, nav, footer"
+        )
+      ) {
+        continue;
+      }
+      if (card.querySelector?.("video")?.videoWidth > 0) continue;
+      hideNode(card, true);
+    }
+  }
+
   function hideForbesAdSlots() {
     if (!enabled) return;
     let nodes;
@@ -1088,6 +1137,8 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     hideAthleticSponsorSlugs();
     hideNineToFiveLeftovers();
     hideSlashdotLeftovers();
+    hideDigitalTrendsSponsored();
+    hideNatGeoPaidContent();
     hideBloombergAdSlots();
     hideSportsAdSlots();
     hideOptidigitalSlots();

@@ -642,6 +642,41 @@
         sticky.style.cssText = "display:block;min-height:90px;margin:12px auto;background:#0b2b26;color:#fff;padding:8px;";
         document.body.appendChild(sticky);
       }, 4900);
+      setTimeout(() => {
+        const rail = el("section", { class: "b-right-rail", "data-lab-content": "dt-deals-rail-delayed" });
+        rail.style.cssText = "max-width:340px;margin:12px auto;background:#fff;color:#111;padding:8px;";
+        const organicDeal = el("div", { "data-lab-content": "dt-organic-deal-delayed" });
+        organicDeal.textContent = "LATEST DEALS Adobe Acrobat’s latest update could make work easier";
+        const sponsored = el("div", {
+          class: "b-right-rail-item b-right-rail__item",
+          "data-lab-ad": "digitaltrends-sponsored-delayed",
+        });
+        const slug = el("div", { class: "b-sponsor b-right-rail-item__sponsor" });
+        slug.textContent = "Sponsored";
+        sponsored.appendChild(slug);
+        sponsored.appendChild(document.createTextNode(" The best back-to-school tech deals you can get right now BRANDED CONTENT"));
+        sponsored.style.cssText = "min-height:72px;background:#eee;padding:8px;";
+        rail.appendChild(organicDeal);
+        rail.appendChild(sponsored);
+        document.body.appendChild(rail);
+      }, 5000);
+      setTimeout(() => {
+        const row = el("div", { class: "HomepagePromos__row", "data-lab-content": "natgeo-latest-delayed" });
+        row.style.cssText = "display:flex;gap:12px;max-width:1020px;margin:12px auto;background:#111;color:#fff;padding:8px;";
+        const organicPromo = el("div", { class: "HomepagePromos__promo", "data-lab-content": "natgeo-editorial-delayed" });
+        organicPromo.textContent = "The Secret Agent With the Sketchbook HISTORY & CULTURE";
+        const paid = el("div", { class: "HomepagePromos__promo ListItemWrapper", "data-lab-ad": "natgeo-paid-delayed" });
+        const badge = el("div", { class: "TextBadge promoted" });
+        const label = el("div", { class: "label" });
+        label.textContent = "Paid Content";
+        badge.appendChild(label);
+        paid.appendChild(badge);
+        paid.appendChild(document.createTextNode(" On Mexico's Riviera Maya, Nature and Humanity Intertwine"));
+        paid.style.cssText = "min-height:72px;background:#333;padding:8px;";
+        row.appendChild(organicPromo);
+        row.appendChild(paid);
+        document.body.appendChild(row);
+      }, 5100);
     }
     const feed = document.getElementById("fb-feed");
     if (feed) {
