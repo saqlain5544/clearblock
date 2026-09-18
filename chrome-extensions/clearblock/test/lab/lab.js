@@ -356,6 +356,14 @@
         card.appendChild(el("div", { "data-testid": "sponsored-tag" }, "Sponsored"));
         document.body.appendChild(card);
       }, 2400);
+      setTimeout(() => {
+        const river = el("cs-responsive-card", {
+          id: "nativead-river-lab-delayed",
+          "data-lab-ad": "msn-nativead-delayed",
+        }, "Delayed MSN nativead river");
+        river.style.cssText = "display:block;width:300px;min-height:72px;margin:12px auto;background:#ddd;";
+        document.body.appendChild(river);
+      }, 2500);
     }
     const feed = document.getElementById("fb-feed");
     if (feed) {

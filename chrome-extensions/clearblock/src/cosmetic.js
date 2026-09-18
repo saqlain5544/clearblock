@@ -72,6 +72,12 @@ iframe[id^="google_ads_iframe"],
 .min-h-\\[250px\\]:has(.optidigital-wrapper-div),
 .min-h-\\[350px\\]:has(.optidigital-wrapper-div),
 [data-testid="sponsored-tag"], [data-sponsored-id],
+a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
+.me-stripe-title-subtitle,
+#displayAdCard, #displayAdBanner,
+[id^="nativead-"],
+.ad-banner-wrapper, .display-ads-container,
+.ad-slug, .sponsored-text.ad-label, a.ad-label-text,
 [data-lab-ad] {
   display: none !important;
 }
@@ -141,6 +147,16 @@ iframe[id^="google_ads_iframe"],
     ".min-h-\\[350px\\]:has(.optidigital-wrapper-div)",
     "[data-testid='sponsored-tag']",
     "[data-sponsored-id]",
+    "a.me-stripe-tile-button:has(.me-stripe-title-subtitle)",
+    ".me-stripe-title-subtitle",
+    "#displayAdCard",
+    "#displayAdBanner",
+    "[id^='nativead-']",
+    ".ad-banner-wrapper",
+    ".display-ads-container",
+    ".ad-slug",
+    ".sponsored-text.ad-label",
+    "a.ad-label-text",
   ];
 
   const NAG_RE =
@@ -204,16 +220,134 @@ iframe[id^="google_ads_iframe"],
 
   function hideMatches(selectors, force) {
     if (!enabled || !selectors.length) return;
+    forEachRoot((root) => hideMatchesInRoot(root, selectors, force));
+    flushCosmeticCount();
+  }
+
+  function hideMatchesInRoot(root, selectors, force) {
     for (const selector of selectors) {
       let nodes;
       try {
-        nodes = document.querySelectorAll(selector);
+        nodes = root.querySelectorAll(selector);
       } catch {
         continue;
       }
       for (const node of nodes) hideNode(node, force);
     }
-    flushCosmeticCount();
+  }
+
+  function shadowRootOf(node) {
+    if (!node || node.nodeType !== 1) return null;
+    try {
+      if (node.shadowRoot) return node.shadowRoot;
+    } catch {
+      // Closed or forbidden.
+    }
+    try {
+      if (typeof chrome !== "undefined" && chrome.dom?.openOrClosedShadowRoot) {
+        return chrome.dom.openOrClosedShadowRoot(node);
+      }
+    } catch {
+      // API missing in this world.
+    }
+    return null;
+  }
+
+  function forEachRoot(fn) {
+    const seen = new Set();
+    const walk = (root) => {
+      if (!root || seen.has(root)) return;
+      seen.add(root);
+      try {
+        fn(root);
+      } catch {
+        // A detached root should not abort the sweep.
+      }
+      let nodes;
+      try {
+        nodes = root.querySelectorAll("*");
+      } catch {
+        return;
+      }
+      for (const n of nodes) {
+        const sr = shadowRootOf(n);
+        if (sr) walk(sr);
+      }
+    };
+    walk(document);
+  }
+
+  const SHADOW_HIDE_CSS = `
+a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
+.me-stripe-title-subtitle,
+#displayAdCard, #displayAdBanner,
+[id^="nativead-"],
+.ad-banner-wrapper, .display-ads-container,
+.ad-slug, .sponsored-text.ad-label, a.ad-label, a.ad-label-text
+{ display: none !important; }
+`;
+
+  function injectCssInRoot(root, cssText, id) {
+    if (!root || !cssText) return;
+    try {
+      if (root.getElementById && root.getElementById(id)) return;
+    } catch {
+      return;
+    }
+    const style = document.createElement("style");
+    style.id = id;
+    style.textContent = cssText;
+    const mount = root.head || root;
+    try {
+      mount.appendChild(style);
+    } catch {
+      // Some roots reject styles.
+    }
+  }
+
+  function hideMsnNativeAds() {
+    if (!enabled) return;
+    forEachRoot((root) => {
+      injectCssInRoot(root, SHADOW_HIDE_CSS, "clearblock-msn");
+      hideMatchesInRoot(
+        root,
+        [
+          "a.me-stripe-tile-button:has(.me-stripe-title-subtitle)",
+          "#displayAdCard",
+          "#displayAdBanner",
+          "[id^='nativead-']",
+          ".ad-banner-wrapper",
+          ".display-ads-container",
+        ],
+        true
+      );
+      let tiles;
+      try {
+        tiles = root.querySelectorAll("a.me-stripe-tile-button");
+      } catch {
+        tiles = [];
+      }
+      for (const tile of tiles) {
+        const text = (tile.innerText || "").replace(/\s+/g, " ").trim();
+        if (/\bad$/i.test(text) && !/outlook|facebook|rewards|microsoft 365/i.test(text)) {
+          hideNode(tile, true);
+        }
+      }
+      let slugs;
+      try {
+        slugs = root.querySelectorAll(".ad-slug, .sponsored-text.ad-label, a.ad-label, a.ad-label-text");
+      } catch {
+        slugs = [];
+      }
+      for (const slug of slugs) {
+        const card =
+          slug.closest?.("cs-content-card") ||
+          slug.closest?.("cs-responsive-card") ||
+          slug.closest?.("[id^='nativead-']");
+        if (card && !card.querySelector?.("video, audio, #movie_player")) hideNode(card, true);
+        else hideNode(slug, true);
+      }
+    });
   }
 
   function dismissNags() {
@@ -370,6 +504,7 @@ iframe[id^="google_ads_iframe"],
     hideAdvertisingContentCards();
     hideBareAdLabels();
     hideOptidigitalSlots();
+    hideMsnNativeAds();
     dismissNags();
   }
 
@@ -386,6 +521,8 @@ iframe[id^="google_ads_iframe"],
     }
   }
 
+  const observedRoots = new WeakSet();
+
   function startObserver() {
     if (observer || !enabled) return;
     const root = document.documentElement;
@@ -393,12 +530,29 @@ iframe[id^="google_ads_iframe"],
       document.addEventListener("DOMContentLoaded", startObserver, { once: true });
       return;
     }
-    observer = new MutationObserver(() => sweep());
-    observer.observe(root, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ["style", "class", "id"],
+    observer = new MutationObserver(() => {
+      observeShadowRoots();
+      sweep();
+    });
+    observeShadowRoots();
+  }
+
+  function observeShadowRoots() {
+    if (!observer) return;
+    forEachRoot((root) => {
+      const target = root === document ? document.documentElement : root;
+      if (!target || observedRoots.has(target)) return;
+      observedRoots.add(target);
+      try {
+        observer.observe(target, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ["style", "class", "id"],
+        });
+      } catch {
+        // Some shadow roots reject observers.
+      }
     });
   }
 
