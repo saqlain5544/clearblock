@@ -9,11 +9,33 @@
 
   const BOOTSTRAP_CSS = `
 .ad, .ads, .ad-banner, .ad-container, .ad-slot, .adbox, .adsbox,
-.advert, .advertisement, .sponsored, .sponsored-slot,
+.advert, .advertisement, .sponsored, .sponsored-slot, .sponsored-unit,
+.sponsor, .promo-ad, .promoted, .promoted-post,
 [id="ad"], [id="ads"], [id="ad-banner"], [class*="Ad-Container"],
 ins.adsbygoogle, .adsbygoogle, #google_ads_iframe,
-.trc_rbox, .OUTBRAIN, .taboola, #taboola-below,
-[id*="google_ads"], [id*="div-gpt-ad"], [class*="div-gpt-ad"] {
+.trc_rbox, .OUTBRAIN, .taboola, #taboola-below, [id^="taboola-"],
+[id*="google_ads"], [id*="div-gpt-ad"], [class*="div-gpt-ad"],
+[id^="div-gpt-ad"], .dfp-ad, .gpt-ad, .ad--gpt, .ad-unit, .adUnit,
+.leaderboard-ad, .billboard-ad, .mpu-ad, .sticky-ad, .ad-sticky,
+.ad-interstitial, .interstitial-ad, .overlay-ad, .popup-ad, .popunder-ad,
+.native-ad, .in-article-ad, .inarticle-ad, .affiliate-ad, .newsletter-ad,
+.cookie-ad, .consent-ad, .prebid-ad, .amp-ad, .amp-ad-wrapper,
+.search-ad, .shopping-ad, .product-ad, .sponsored-result,
+[aria-label="Sponsored"], [data-ad-comet-preview], [data-testid="fb-sponsored"],
+[data-pagelet="FeedAd"], [data-pagelet="RightRailAds"], [data-pagelet="StoryAd"],
+.fb-ad, .fbAd, .fb-sponsored, .fb-instream-ad, .story-ad, .marketplace-ad,
+.right-rail-ad, .fb-right-rail-ad, .reels-ad,
+ytd-ad-slot-renderer, ytd-display-ad-renderer, ytd-in-feed-ad-layout-renderer,
+ytd-promoted-sparkles-web-renderer, ytd-companion-slot-renderer,
+ytd-video-masthead-ad-v3-renderer, ytd-promoted-video-renderer,
+ytd-action-companion-ad-renderer, ytd-banner-promo-renderer,
+ytd-mealbar-promo-renderer, ytd-enforcement-message-view-model,
+ytd-player-legacy-desktop-watch-ads-renderer,
+ytd-rich-item-renderer:has(ytd-ad-slot-renderer),
+#masthead-ad, #player-ads, .ytp-ad-module, .video-ads,
+[class*="ytp-ad-"], .ytp-flyout-cta, .ytp-paid-content-overlay,
+.jw-ad, .video-js-ad, .ima-ad-container, .vast-ad,
+iframe[id^="google_ads"], iframe[src*="doubleclick"], iframe[src*="googlesyndication"] {
   display: none !important;
 }
 `;
@@ -29,11 +51,35 @@ ins.adsbygoogle, .adsbygoogle, #google_ads_iframe,
 
   const PROTECT_TAGS = new Set(["VIDEO", "AUDIO", "SOURCE", "TRACK", "CANVAS"]);
 
+  function isExplicitAdContainer(node) {
+    if (!node || !node.matches) return false;
+    try {
+      if (
+        node.matches(
+          '[data-lab-ad], ytd-ad-slot-renderer, ytd-display-ad-renderer, ytd-in-feed-ad-layout-renderer, ytd-promoted-sparkles-web-renderer, ytd-companion-slot-renderer, ytd-video-masthead-ad-v3-renderer, ytd-promoted-video-renderer, ins.adsbygoogle, .adsbygoogle, [id*="google_ads"], [id*="div-gpt-ad"], [class*="div-gpt-ad"], .OUTBRAIN, .taboola, [id^="taboola-"], .trc_rbox, [aria-label="Sponsored"], .fb-instream-ad, .ima-ad-container'
+        )
+      ) {
+        return true;
+      }
+    } catch {
+      // Invalid selector in older engines.
+    }
+    const id = node.id || "";
+    const cls = typeof node.className === "string" ? node.className : "";
+    return /(?:^|[^a-z])(?:ad|ads|advert|sponsor|sponsored|gpt|dfp|prebid|taboola|outbrain)(?:[^a-z]|$)/i.test(
+      `${id} ${cls}`
+    );
+  }
+
   function isProtected(node) {
     if (!node || node.nodeType !== 1) return true;
     if (PROTECT_TAGS.has(node.tagName)) return true;
     if (node.id === "movie_player" || node.classList?.contains("html5-video-player")) return true;
-    if (node.closest?.("video, audio, ytd-player, #movie_player, .html5-video-player")) return true;
+    if (isExplicitAdContainer(node)) return false;
+    if (node.closest?.("[data-lab-ad], ytd-ad-slot-renderer, .fb-instream-ad, .ima-ad-container")) return false;
+    if (node.closest?.("video, audio, ytd-player, #movie_player, .html5-video-player, [data-lab-content='player']")) {
+      return true;
+    }
     if (node.querySelector?.("video, audio")) return true;
     return false;
   }

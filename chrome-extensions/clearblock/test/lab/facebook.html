@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Facebook lab · Clearblock</title>
+    <link rel="stylesheet" href="lab.css" />
+  </head>
+  <body class="fb-app">
+    <div class="lab-scoreboard" id="lab-scoreboard">Facebook lab…</div>
+    <header class="fb-top">
+      <div class="fb-wordmark">facebook</div>
+      <input class="fb-search" placeholder="Search Facebook" />
+      <div>Home · Friends · Watch · Marketplace</div>
+    </header>
+    <div class="fb-layout">
+      <aside class="fb-col">
+        <div class="fb-card" data-lab-content="shortcuts">
+          <div class="fb-rail-item"><strong>Maya Chen</strong></div>
+          <div class="fb-rail-item">Friends</div>
+          <div class="fb-rail-item">Memories</div>
+          <div class="fb-rail-item">Saved</div>
+        </div>
+        <div class="fb-card">
+          <h4>Sponsored</h4>
+          <div class="right-rail-ad fb-right-rail-ad fb-ad lab-fill" data-lab-ad="facebook-rightrail">Right-rail · conversion campaign</div>
+          <div class="right-rail-ad lab-fill" data-lab-ad="facebook-rightrail">Right-rail · app install</div>
+          <div class="fb-ad lab-fill" data-lab-ad="facebook-rightrail" data-pagelet="RightRailAds">data-pagelet RightRailAds</div>
+        </div>
+      </aside>
+
+      <main>
+        <section class="fb-card">
+          <div class="fb-stories" id="fb-stories">
+            <div class="fb-story" data-lab-content="story">Your story</div>
+            <div class="fb-story" data-lab-content="story">Diego</div>
+            <div class="fb-story story-ad" data-lab-ad="facebook-story" data-pagelet="StoryAd">Sponsored story</div>
+            <div class="fb-story" data-lab-content="story">Priya</div>
+            <div class="fb-story story-ad reels-ad" data-lab-ad="facebook-reels">Reels ad</div>
+            <div class="fb-story" data-lab-content="story">Library</div>
+          </div>
+        </section>
+        <section id="fb-feed">
+          <article class="fb-post" data-lab-content="post">
+            <header><div class="fb-avatar"></div><div><strong>Oak Park Library</strong><div>2h · Public</div></div></header>
+            <div class="body">
+              Saturday used-book sale in the courtyard. Vinyl too.
+              <div class="lab-content-player" data-lab-content="player">
+                <video muted playsinline loop src="../sample.mp4"></video>
+              </div>
+            </div>
+          </article>
+        </section>
+      </main>
+
+      <aside class="fb-col">
+        <div class="fb-card">
+          <h4>Marketplace</h4>
+          <div class="fb-market">
+            <figure data-lab-content="listing">Desk lamp · $18</figure>
+            <figure class="marketplace-ad" data-lab-ad="facebook-marketplace">Sponsored scooter</figure>
+            <figure data-lab-content="listing">Cast iron · $22</figure>
+            <figure class="marketplace-ad" data-lab-ad="facebook-marketplace">Boosted listing · mattress</figure>
+            <figure data-lab-content="listing">Bike trailer · $40</figure>
+            <figure class="marketplace-ad" data-lab-ad="facebook-marketplace">Lead gen · solar quotes</figure>
+          </div>
+        </div>
+        <div class="fb-card">
+          <h4>Contacts</h4>
+          <div class="fb-rail-item" data-lab-content="contact">Amina · Active</div>
+          <div class="fb-rail-item" data-lab-content="contact">Jonah · 12m</div>
+        </div>
+        <img class="lab-pixel" alt="" width="1" height="1" src="https://www.facebook.com/tr?id=lab&ev=PageView" />
+      </aside>
+    </div>
+    <script src="lab.js"></script>
+  </body>
+</html>

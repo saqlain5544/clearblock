@@ -2,48 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Clearblock video lab</title>
-    <style>
-      body { font: 16px/1.5 sans-serif; max-width: 44rem; margin: 2rem auto; padding: 0 1rem; }
-      video { width: 100%; background: #111; }
-      .ad-banner, #Ad-Container { background: #c00; color: #fff; padding: 1rem; margin: 1rem 0; }
-      .ok { color: #0a7; }
-      .fail { color: #c00; }
-    </style>
+    <meta http-equiv="refresh" content="0; url=lab/index.html" />
+    <title>Redirect</title>
   </head>
   <body>
-    <h1>Clearblock video lab</h1>
-    <p>
-      Playback must keep working while the red ad slots disappear. This page
-      plays a local HTML5 file and a short remote sample — neither is an ad host.
-    </p>
-    <video id="local" controls muted playsinline src="sample.mp4"></video>
-    <p id="local-status">Local video: waiting…</p>
-    <video id="remote" controls muted playsinline src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"></video>
-    <p id="remote-status">Remote HTML5 video: waiting…</p>
-    <div class="ad-banner">Cosmetic ad slot (.ad-banner) — should be hidden.</div>
-    <div id="Ad-Container">Cosmetic ad slot (#Ad-Container) — should be hidden.</div>
-    <p id="ad-status"></p>
-    <script>
-      function watch(id, statusId, label) {
-        const video = document.getElementById(id);
-        const status = document.getElementById(statusId);
-        const mark = (ok, text) => {
-          status.className = ok ? "ok" : "fail";
-          status.textContent = label + ": " + text;
-        };
-        video.addEventListener("playing", () => mark(true, "playing"));
-        video.addEventListener("error", () => mark(false, "error — playback failed"));
-        video.play().then(() => mark(true, "play() resolved")).catch((err) => mark(false, String(err)));
-      }
-      watch("local", "local-status", "Local video");
-      watch("remote", "remote-status", "Remote HTML5 video");
-      const hidden = [...document.querySelectorAll(".ad-banner, #Ad-Container")].every(
-        (el) => getComputedStyle(el).display === "none"
-      );
-      document.getElementById("ad-status").textContent = hidden
-        ? "Ad slots are hidden."
-        : "Ad slots still visible (reload after loading the extension).";
-    </script>
+    <p>Moved to <a href="lab/index.html">the internet ad lab</a>.</p>
   </body>
 </html>

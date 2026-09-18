@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>YouTube lab · Clearblock</title>
+    <link rel="stylesheet" href="lab.css" />
+  </head>
+  <body class="yt-app">
+    <div class="lab-scoreboard" id="lab-scoreboard">YouTube lab…</div>
+    <header class="yt-masthead">
+      <div class="yt-logo"><span>▶</span> YouTube</div>
+      <form class="yt-search"><input value="clearblock lab" aria-label="Search" /><button type="button">Search</button></form>
+      <div>Sign in</div>
+    </header>
+    <div id="masthead-ad" class="lab-fill" data-lab-ad="youtube-masthead">Homepage masthead ad v3 — 970×250</div>
+    <ytd-video-masthead-ad-v3-renderer data-lab-ad="youtube-masthead-renderer" class="lab-fill">ytd-video-masthead-ad-v3-renderer</ytd-video-masthead-ad-v3-renderer>
+
+    <div class="yt-shell">
+      <nav class="yt-nav">
+        <div><b>⌂</b>Home</div>
+        <div><b>▶</b>Shorts</div>
+        <div><b>▤</b>Subs</div>
+        <div><b>◷</b>You</div>
+      </nav>
+      <main>
+        <section class="yt-home">
+          <div class="yt-chips">
+            <button class="on">All</button><button>Music</button><button>Live</button><button>Mixes</button><button>News</button><button>Gaming</button>
+          </div>
+          <div id="yt-home-grid" class="yt-grid">
+            <ytd-rich-item-renderer data-lab-ad="youtube-rich-ad">
+              <ytd-ad-slot-renderer class="lab-fill">Homepage rich-item in-feed ad</ytd-ad-slot-renderer>
+            </ytd-rich-item-renderer>
+            <ytd-promoted-sparkles-web-renderer class="lab-fill" data-lab-ad="youtube-sparkles">Promoted sparkles</ytd-promoted-sparkles-web-renderer>
+            <ytd-promoted-video-renderer class="lab-fill" data-lab-ad="youtube-promoted-video">Promoted video tile</ytd-promoted-video-renderer>
+          </div>
+        </section>
+
+        <section class="yt-watch" id="watch">
+          <div>
+            <div id="movie_player" class="html5-video-player ad-showing">
+              <div class="html5-video-container lab-content-player" data-lab-content="player">
+                <video class="html5-main-video" muted playsinline src="../sample.mp4"></video>
+              </div>
+              <div class="ytp-ad-module video-ads">
+                <div class="ytp-ad-player-overlay">Ad 1 of 2 · Visit advertiser</div>
+                <div class="ytp-ad-player-overlay-instream-info">Preroll 0:15</div>
+                <div class="ytp-ad-text">Skip in 5</div>
+                <div class="ytp-ad-preview-container">Preview</div>
+                <div class="ytp-flyout-cta">Shop this brand</div>
+                <button class="ytp-ad-skip-button-modern" type="button">Skip Ad</button>
+              </div>
+              <div class="ytp-ad-overlay-slot lab-fill" data-lab-ad="youtube-overlay">Lower-third overlay ad</div>
+              <div class="ytp-ad-image-overlay lab-fill" data-lab-ad="youtube-image-overlay">Image overlay</div>
+              <div class="ytp-paid-content-overlay" data-lab-ad="youtube-paid-content">Includes paid promotion</div>
+            </div>
+            <div class="yt-meta">
+              <h1>Night train through the Alps — 4K cabin window</h1>
+              <p>Clearblock Lab · 2.4M views · Oct 3, 2024</p>
+            </div>
+            <div id="player-ads" class="lab-fill" data-lab-ad="youtube-companion">Companion slot under player</div>
+            <ytd-companion-slot-renderer class="lab-fill" data-lab-ad="youtube-companion-renderer">ytd-companion-slot-renderer 300×250</ytd-companion-slot-renderer>
+            <ytd-action-companion-ad-renderer class="lab-fill" data-lab-ad="youtube-action-companion">Action companion</ytd-action-companion-ad-renderer>
+            <ytd-player-legacy-desktop-watch-ads-renderer class="lab-fill" data-lab-ad="youtube-legacy-watch-ads">Legacy desktop watch ads</ytd-player-legacy-desktop-watch-ads-renderer>
+            <ytd-mealbar-promo-renderer class="lab-fill" data-lab-ad="youtube-mealbar">YouTube Premium mealbar</ytd-mealbar-promo-renderer>
+            <ytd-banner-promo-renderer class="lab-fill" data-lab-ad="youtube-banner-promo">Banner promo</ytd-banner-promo-renderer>
+            <div class="yt-comments">
+              <div class="yt-comment" data-lab-content="comment"><strong>Alex</strong> The rain on the glass at 2:14 is perfect.</div>
+              <div class="yt-comment" data-lab-content="comment"><strong>Samira</strong> Headphones recommended.</div>
+            </div>
+          </div>
+          <aside class="yt-secondary">
+            <div id="yt-related"></div>
+            <ytd-display-ad-renderer class="lab-fill" data-lab-ad="youtube-display">Display ad renderer</ytd-display-ad-renderer>
+            <ytd-in-feed-ad-layout-renderer class="lab-fill" data-lab-ad="youtube-infeed-layout">In-feed ad layout</ytd-in-feed-ad-layout-renderer>
+          </aside>
+        </section>
+      </main>
+    </div>
+    <ytd-enforcement-message-view-model class="lab-fill" data-lab-ad="youtube-enforcement">Ad blockers are not allowed on YouTube</ytd-enforcement-message-view-model>
+    <script>
+      window.ytInitialPlayerResponse = {
+        videoDetails: { videoId: "labAlpine", title: "Night train through the Alps" },
+        streamingData: { serverAbrStreamingUrl: location.origin + "/test/sample.mp4" },
+        adPlacements: [{ playerAttachedAdPlacementRenderer: { kind: "PREROLL" } }, { kind: "MIDROLL" }],
+        adSlots: [{ getMidroll: true }],
+        playerAds: [{ instreamVideoAdRenderer: { skippable: true } }],
+        adBreakHeartbeatParams: { ping: true },
+      };
+      window.ytInitialData = {
+        contents: {
+          twoColumnWatchNextResults: {
+            results: { results: { contents: [{ videoPrimaryInfoRenderer: {} }, { adSlotRenderer: { slot: "watch-next" } }] } },
+            secondaryResults: { results: [{ adSlotRenderer: {} }, { compactVideoRenderer: {} }] },
+          },
+        },
+      };
+      const player = document.getElementById("movie_player");
+      const video = player.querySelector("video");
+      player.querySelector(".ytp-ad-skip-button-modern").addEventListener("click", () => {
+        player.classList.remove("ad-showing");
+        video.currentTime = 0;
+        video.muted = true;
+        video.play();
+      });
+      video.addEventListener("ended", () => {
+        if (player.classList.contains("ad-showing")) {
+          player.classList.remove("ad-showing");
+          video.currentTime = 0;
+          video.play();
+        }
+      });
+      setTimeout(() => {
+        if (!player.classList.contains("ad-showing")) {
+          player.classList.add("ad-showing");
+          const overlay = document.querySelector(".ytp-ad-player-overlay");
+          if (overlay) overlay.textContent = "Ad 2 of 2 · Mid-roll";
+        }
+      }, 2800);
+    </script>
+    <script src="lab.js"></script>
+  </body>
+</html>

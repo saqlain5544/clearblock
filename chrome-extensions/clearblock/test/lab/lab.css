@@ -1,0 +1,129 @@
+/* Shared Clearblock internet-ad lab chrome. Fixtures imitate real sites, not a toy grid. */
+
+:root {
+  --lab-danger: #c81e1e;
+  --lab-ok: #128a4b;
+  --lab-warn: #b58100;
+}
+
+* { box-sizing: border-box; }
+[data-lab-ad] { outline: 2px dashed rgba(200, 30, 30, 0.55); outline-offset: -2px; }
+[data-lab-ad]::before {
+  content: attr(data-lab-ad);
+  display: block;
+  font: 700 10px/1.2 ui-sans-serif, system-ui, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--lab-danger);
+  color: #fff;
+  padding: 4px 8px;
+}
+
+.lab-scoreboard {
+  position: sticky;
+  top: 0;
+  z-index: 80;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  align-items: center;
+  padding: 10px 16px;
+  background: #111;
+  color: #f4f4f4;
+  font: 13px/1.4 ui-sans-serif, system-ui, sans-serif;
+  border-bottom: 3px solid #3ee0b2;
+}
+.lab-scoreboard strong { font-size: 18px; }
+.lab-scoreboard .ok { color: #3ee0b2; }
+.lab-scoreboard .fail { color: #ff8b8b; }
+.lab-scoreboard a { color: #9be7d2; }
+
+/* ——— YouTube ——— */
+.yt-app { margin: 0; background: #0f0f0f; color: #f1f1f1; font: 14px/1.45 "Roboto", Arial, sans-serif; }
+.yt-masthead {
+  display: flex; align-items: center; gap: 16px;
+  height: 56px; padding: 0 16px; background: #0f0f0f;
+  border-bottom: 1px solid #272727; position: sticky; top: 48px; z-index: 40;
+}
+.yt-logo { font-weight: 800; letter-spacing: -0.04em; font-size: 20px; }
+.yt-logo span { color: #f00; }
+.yt-search { flex: 1; display: flex; max-width: 640px; }
+.yt-search input { flex: 1; background: #121212; border: 1px solid #303030; color: inherit; padding: 8px 12px; border-radius: 40px 0 0 40px; }
+.yt-search button { border: 1px solid #303030; background: #222; color: inherit; padding: 8px 18px; border-radius: 0 40px 40px 0; }
+.yt-shell { display: grid; grid-template-columns: 72px 1fr; min-height: 100vh; }
+.yt-nav { padding: 12px 8px; display: flex; flex-direction: column; gap: 8px; font-size: 11px; text-align: center; color: #aaa; }
+.yt-nav b { display: block; font-size: 18px; color: #fff; }
+.yt-home { padding: 12px 24px 64px; }
+.yt-chips { display: flex; gap: 8px; overflow: auto; padding: 8px 0 16px; }
+.yt-chips button { background: #272727; color: inherit; border: 0; border-radius: 8px; padding: 6px 12px; white-space: nowrap; }
+.yt-chips button.on { background: #fff; color: #000; }
+.yt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px 16px; }
+.yt-card video, .yt-card .thumb { width: 100%; aspect-ratio: 16/9; object-fit: cover; background: #000; border-radius: 12px; display: block; }
+.yt-card h3 { margin: 8px 0 0; font-size: 16px; font-weight: 600; }
+.yt-card p { margin: 4px 0 0; color: #aaa; font-size: 13px; }
+.yt-watch { display: grid; grid-template-columns: minmax(0, 1fr) 402px; gap: 24px; padding: 24px; }
+#movie_player { position: relative; background: #000; aspect-ratio: 16/9; overflow: hidden; border-radius: 12px; }
+#movie_player video { width: 100%; height: 100%; object-fit: cover; }
+.ytp-ad-player-overlay { position: absolute; inset: 0; background: linear-gradient(transparent, rgba(180,0,0,.72)); color: #fff; padding: 12px; font-weight: 700; display: flex; }
+.ytp-ad-skip-button-modern { position: absolute; right: 12px; bottom: 48px; background: #fff; color: #111; border: 0; padding: 8px 14px; }
+.yt-secondary { display: flex; flex-direction: column; gap: 12px; }
+.yt-related { display: grid; grid-template-columns: 168px 1fr; gap: 8px; }
+.yt-related .thumb { width: 168px; height: 94px; background: #222; border-radius: 8px; }
+.yt-meta h1 { font-size: 20px; margin: 12px 0 4px; }
+.yt-comments { margin-top: 24px; }
+.yt-comment { display: flex; gap: 12px; padding: 12px 0; border-top: 1px solid #272727; }
+
+/* ——— Facebook ——— */
+.fb-app { margin: 0; background: #f0f2f5; color: #050505; font: 15px/1.4 "Segoe UI", Helvetica, Arial, sans-serif; }
+.fb-top {
+  position: sticky; top: 48px; z-index: 40; height: 56px; background: #fff;
+  display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.12);
+}
+.fb-wordmark { color: #0866ff; font-size: 32px; font-weight: 800; }
+.fb-search { background: #f0f2f5; border: 0; border-radius: 20px; padding: 8px 14px; width: 240px; }
+.fb-layout { display: grid; grid-template-columns: 280px minmax(0, 680px) 300px; gap: 16px; max-width: 1280px; margin: 16px auto; padding: 0 12px 80px; }
+.fb-col h4 { margin: 0 0 8px; color: #650; }
+.fb-card, .fb-post { background: #fff; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,.1); margin-bottom: 12px; overflow: hidden; }
+.fb-post header { padding: 12px 16px 0; display: flex; gap: 10px; align-items: center; }
+.fb-avatar { width: 40px; height: 40px; border-radius: 50%; background: #0866ff; }
+.fb-post .body { padding: 8px 16px 12px; }
+.fb-post video { width: 100%; max-height: 360px; background: #000; display: block; }
+.fb-stories { display: flex; gap: 8px; overflow: auto; padding: 8px; }
+.fb-story { flex: 0 0 112px; height: 200px; border-radius: 12px; background: linear-gradient(#4b6cb7, #182848); color: #fff; padding: 8px; font-size: 13px; font-weight: 700; }
+.fb-rail-item { padding: 10px 12px; border-top: 1px solid #eee; font-size: 13px; }
+.fb-market { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 8px; }
+.fb-market figure { margin: 0; background: #e4e6eb; border-radius: 8px; min-height: 120px; padding: 8px; font-size: 13px; }
+
+/* ——— Web zoo (news / search / shop) ——— */
+.web-app { margin: 0; background: #fff; color: #121212; font: 16px/1.55 "Georgia", serif; }
+.web-nav { display: flex; justify-content: space-between; align-items: center; padding: 8px 24px; border-bottom: 1px solid #111; font-family: ui-sans-serif, system-ui, sans-serif; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
+.web-wordmark { font-family: "Georgia", serif; font-size: 42px; font-weight: 700; text-align: center; padding: 12px 0 4px; letter-spacing: -0.03em; }
+.web-kicker { text-align: center; font-family: ui-sans-serif, system-ui; font-size: 12px; color: #555; padding-bottom: 12px; border-bottom: 1px solid #111; }
+.web-wrap { display: grid; grid-template-columns: 1fr 300px; gap: 28px; max-width: 1180px; margin: 0 auto; padding: 20px 20px 80px; }
+.web-article h1 { font-size: 40px; line-height: 1.15; margin: 0 0 12px; }
+.web-article .standfirst { font-size: 20px; color: #333; }
+.web-article p { max-width: 42rem; }
+.web-side h3 { font-family: ui-sans-serif, system-ui; font-size: 14px; letter-spacing: 0.06em; text-transform: uppercase; border-top: 3px solid #111; padding-top: 8px; }
+.search-bar { display: flex; gap: 0; max-width: 640px; margin: 20px auto; font-family: arial, sans-serif; }
+.search-bar input { flex: 1; padding: 12px 16px; border: 1px solid #dfe1e5; border-radius: 24px; font-size: 16px; }
+.serp { font-family: arial, sans-serif; max-width: 720px; margin: 0 auto 32px; }
+.serp .organic { padding: 12px 0; }
+.serp .organic a { color: #1a0dab; font-size: 20px; text-decoration: none; }
+.shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; font-family: ui-sans-serif, system-ui; }
+.shop-card { border: 1px solid #ddd; border-radius: 8px; padding: 12px; min-height: 160px; }
+.amp-strip { display: flex; gap: 12px; overflow: auto; padding: 12px 0; }
+.amp-card { flex: 0 0 220px; background: #f6f6f6; padding: 12px; border-radius: 8px; }
+.jw-wrap, .vjs-wrap { background: #111; color: #fff; padding: 8px; margin: 16px 0; font-family: ui-sans-serif, system-ui; }
+.jw-wrap video, .vjs-wrap video { width: 100%; display: block; background: #000; }
+
+.cookie-bar { position: fixed; bottom: 0; left: 0; right: 0; background: #111; color: #fff; padding: 12px 16px; display: flex; gap: 12px; align-items: center; z-index: 70; font-family: ui-sans-serif, system-ui; font-size: 13px; }
+.mobile-drawer { display: none; }
+@media (max-width: 900px) {
+  .yt-watch, .fb-layout, .web-wrap { grid-template-columns: 1fr; }
+  .yt-shell { grid-template-columns: 1fr; }
+  .mobile-drawer { display: block; position: fixed; right: 8px; bottom: 64px; width: 120px; min-height: 180px; background: #c00; color: #fff; z-index: 60; padding: 8px; font-size: 12px; }
+}
+
+.lab-fill { background: repeating-linear-gradient(135deg, #c81e1e, #c81e1e 10px, #8a1010 10px, #8a1010 20px); color: #fff; min-height: 90px; padding: 12px; font-family: ui-sans-serif, system-ui; font-size: 13px; font-weight: 700; }
+.lab-pixel { width: 1px; height: 1px; position: absolute; opacity: 0; }

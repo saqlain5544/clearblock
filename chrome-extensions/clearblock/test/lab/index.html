@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Clearblock internet ad lab</title>
+    <link rel="stylesheet" href="lab.css" />
+    <style>
+      body { margin: 0; background: #0b1114; color: #e8eef4; font: 15px/1.45 ui-sans-serif, system-ui, sans-serif; }
+      .hub-head { padding: 18px 20px 8px; }
+      .hub-head h1 { margin: 0; font-size: 28px; }
+      .hub-head p { color: #93a4b3; max-width: 52rem; }
+      .hub-nav { display: flex; gap: 8px; flex-wrap: wrap; padding: 0 20px 12px; }
+      .hub-nav a { color: #0d3b34; background: #3ee0b2; text-decoration: none; font-weight: 700; padding: 8px 12px; border-radius: 8px; }
+      .agg { padding: 8px 20px; font-family: ui-monospace, monospace; font-size: 13px; }
+      iframe { width: 100%; border: 0; min-height: 1100px; background: #fff; margin: 0 0 28px; }
+    </style>
+  </head>
+  <body>
+    <header class="hub-head">
+      <h1>Clearblock internet ad lab</h1>
+      <p>
+        Three realistic fixtures — YouTube, Facebook, and a news/search/shop web zoo —
+        packed with preroll, midroll, overlay, companion, masthead, in-feed, sponsored
+        posts, right-rail, stories, marketplace, GPT, sticky, interstitials, popups,
+        native, affiliate, consent-adjacent, prebid, AMP, search ads, shopping, and
+        extra video players. Content video must keep playing.
+      </p>
+    </header>
+    <nav class="hub-nav">
+      <a href="youtube.html">YouTube</a>
+      <a href="facebook.html">Facebook</a>
+      <a href="web.html">Web zoo</a>
+    </nav>
+    <div class="agg" id="agg">Waiting on framed labs…</div>
+    <iframe src="youtube.html" title="YouTube lab" id="f-yt"></iframe>
+    <iframe src="facebook.html" title="Facebook lab" id="f-fb"></iframe>
+    <iframe src="web.html" title="Web zoo lab" id="f-web"></iframe>
+    <script>
+      const reports = {};
+      window.addEventListener("message", (event) => {
+        if (event.data?.source !== "clearblock-lab") return;
+        reports[event.data.href] = event.data;
+        const rows = Object.values(reports);
+        const ads = rows.reduce((n, r) => n + (r.ads?.visible || 0), 0);
+        const total = rows.reduce((n, r) => n + (r.ads?.total || 0), 0);
+        const videosOk = rows.every((r) => r.videoOk !== false);
+        document.getElementById("agg").innerHTML =
+          `<strong>${ads === 0 ? "PASS" : "LEAK"}</strong> · ${total - ads}/${total} ad slots hidden · leftover ${ads} · content video ${videosOk ? "ok" : "FAIL"}`;
+        document.getElementById("agg").style.color = ads === 0 && videosOk ? "#3ee0b2" : "#ff8b8b";
+      });
+    </script>
+  </body>
+</html>

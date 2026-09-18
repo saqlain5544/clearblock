@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Web zoo lab · Clearblock</title>
+    <link rel="stylesheet" href="lab.css" />
+  </head>
+  <body class="web-app">
+    <div class="lab-scoreboard" id="lab-scoreboard">Web zoo…</div>
+    <div class="web-nav"><span>News · Opinion · Culture · Lifestyle · Sport</span><span>Edition: US</span></div>
+    <div class="web-wordmark">The Daily Lab</div>
+    <div class="web-kicker">Saturday 18 September 2026 · A Guardian-style masthead with every ad format we could pack in</div>
+
+    <div id="div-gpt-ad-leaderboard" class="leaderboard-ad dfp-ad lab-fill" data-lab-ad="gpt-leaderboard">GPT leaderboard 728×90 / 970×90</div>
+    <div class="billboard-ad ad-banner lab-fill" data-lab-ad="billboard">Billboard 970×250</div>
+
+    <div class="search-bar"><input value="ad blocker easylist" /><span style="padding:12px">Google</span></div>
+    <div class="serp" id="web-serp"></div>
+
+    <div class="web-wrap">
+      <article class="web-article">
+        <p style="font-family:ui-sans-serif,system-ui;font-size:12px;letter-spacing:.08em;text-transform:uppercase;">Technology</p>
+        <h1>Inside the quiet war between publishers and the ad-tech stack</h1>
+        <p class="standfirst">Header bidding, consent walls, and seven partners on a single article. This fixture copies that page so Clearblock can be stress-tested.</p>
+        <p data-lab-content="article">Publishers still ship journalism in the left column. The rest of the viewport is inventory: GPT, Prebid demand, taboola rails, newsletter grabs, and a video player that must keep playing.</p>
+
+        <div class="in-article-ad native-ad lab-fill" data-lab-ad="in-article">In-article native 300×250</div>
+        <ins class="adsbygoogle" data-lab-ad="adsbygoogle" style="display:block;min-height:90px">adsbygoogle ins</ins>
+
+        <p data-lab-content="article">A second graf so the page still reads like a newspaper once the slots collapse. Rail workers, city budgets, a photo essay — none of that is an ad.</p>
+
+        <div class="jw-wrap lab-content-player" data-lab-content="player">
+          <div>JW-style player · editorial cut</div>
+          <video muted playsinline controls src="../sample.mp4"></video>
+          <div class="jw-ad ima-ad-container vast-ad lab-fill" data-lab-ad="jwplayer-ima">IMA/VAST overlay on JW player</div>
+        </div>
+
+        <div class="vjs-wrap lab-content-player" data-lab-content="player">
+          <div>Video.js / HTML5 · remote sample</div>
+          <video id="remote-html5" muted playsinline controls src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"></video>
+          <div class="video-js-ad lab-fill" data-lab-ad="videojs-ad">video.js ad container</div>
+        </div>
+
+        <p data-lab-content="article">Affiliate modules often sit under “we recommend”. Tracking pixels sit in the footer. Cookie banners grow a second sponsored column.</p>
+
+        <div class="affiliate-ad lab-fill" data-lab-ad="affiliate">Affiliate · “Top VPN 2026” (amazon-adsystem)</div>
+        <div class="newsletter-ad lab-fill" data-lab-ad="newsletter">Newsletter gate with a demand-side pixel</div>
+        <div class="prebid-ad lab-fill" data-lab-ad="prebid">Prebid / header bidding failed creative</div>
+        <div class="OUTBRAIN" data-lab-ad="outbrain"><div class="lab-fill">Outbrain widget</div></div>
+        <div class="taboola" id="taboola-below" data-lab-ad="taboola"><div class="lab-fill">Taboola below-article</div></div>
+        <div class="trc_rbox lab-fill" data-lab-ad="revcontent">Revcontent / trc_rbox</div>
+
+        <h2>From our shop</h2>
+        <div class="shop-grid" id="web-shop"></div>
+
+        <h2>AMP-like related</h2>
+        <div class="amp-strip" id="web-native">
+          <div class="amp-ad-wrapper amp-ad lab-fill" data-lab-ad="amp-ad">AMP ad 300×100</div>
+        </div>
+      </article>
+
+      <aside class="web-side">
+        <h3>Most viewed</h3>
+        <ol data-lab-content="most-viewed">
+          <li>City council votes on night buses</li>
+          <li>A baker in Lisbon</li>
+          <li>Chess, unexplained</li>
+        </ol>
+        <div id="web-gpt-stack"></div>
+        <div class="mpu-ad ad-slot lab-fill" data-lab-ad="mpu">MPU 300×250</div>
+        <div class="advertisement lab-fill" data-lab-ad="advertisement-label">Advertisement label stack</div>
+        <h3>Sponsored</h3>
+        <div class="sponsored-content lab-fill" data-lab-ad="sponsored-content">Sponsored content card</div>
+      </aside>
+    </div>
+
+    <div class="ad-interstitial interstitial-ad overlay-ad lab-fill" data-lab-ad="interstitial" style="position:fixed;inset:10% 10%;z-index:50;">Interstitial takeover · click to nowhere</div>
+    <div class="popup-ad lab-fill" data-lab-ad="popup" style="position:fixed;top:80px;right:20px;width:280px;z-index:55;">Popup / popover ad</div>
+    <div class="popunder-ad lab-fill" data-lab-ad="popunder">Popunder creative</div>
+    <div class="sticky-ad ad-sticky lab-fill" data-lab-ad="sticky-footer" style="position:fixed;bottom:48px;left:0;right:0;z-index:45;">Sticky footer ad 320×50 / 728×90</div>
+    <div class="cookie-bar">
+      <span data-lab-content="consent">We use cookies for reading analytics.</span>
+      <div class="cookie-ad consent-ad lab-fill" data-lab-ad="cookie-adjacent">Sponsored privacy partner</div>
+      <button type="button">Accept</button>
+    </div>
+    <div class="mobile-drawer ad-slot" data-lab-ad="mobile-drawer">Mobile sticky drawer</div>
+
+    <img alt="" class="lab-pixel" src="https://pagead2.googlesyndication.com/pagead/imgad?id=lab" />
+    <img alt="" class="lab-pixel" src="https://sb.scorecardresearch.com/p?c1=2&c2=lab" />
+    <img alt="" class="lab-pixel" src="https://amazon-adsystem.com/e/ir?t=lab" />
+    <script src="lab.js"></script>
+  </body>
+</html>

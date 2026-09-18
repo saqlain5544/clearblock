@@ -94,6 +94,13 @@ Nothing is sent to a Clearblock server. Visiting a website still talks to that w
 
 ## Local labs
 
-`chrome-extensions/clearblock/test/ad-lab.html` is a fixture page with EasyList cosmetic slots and requests to Google ad hosts. Load the extension, open that file in Chrome, and the red slots should vanish while the ad-host requests fail.
+The stress fixture is `chrome-extensions/clearblock/test/lab/index.html` (YouTube, Facebook, and a news/search/shop web zoo). Serve the extension folder and open `/test/lab/`:
 
-`chrome-extensions/clearblock/test/video-lab.html` plays a local MP4 and a remote HTML5 sample. Both must play with Clearblock on; the red ad slots on that page should still hide.
+```bash
+python3 -m http.server 43180 --bind 127.0.0.1
+# http://127.0.0.1:43180/test/lab/
+```
+
+Each page paints a scoreboard: ad slots hidden vs leftover, and whether content video still plays. Network probes hit real ad hosts (they should fail with the extension on).
+
+`test/youtube-player-lab.html` remains a focused preroll harness.
