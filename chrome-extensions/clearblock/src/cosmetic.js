@@ -478,10 +478,10 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     for (const node of nodes) {
       const raw = node.textContent;
       if (!raw || raw.length > 1600) continue;
-      if (!/advertising content from|sponsored:\s*content from/i.test(raw)) continue;
       const text = raw.replace(/\s+/g, " ").trim();
-      if (!/\b(?:advertising content from|sponsored:\s*content from)\b/i.test(text.slice(0, 120))) continue;
-      if (node.querySelector?.("video, audio, #movie_player")) continue;
+      if (/^trending:/i.test(text)) continue;
+      if (!/^(?:advertising content from|sponsored:\s*content from)\b/i.test(text)) continue;
+      if (node.querySelector?.("video, audio, #movie_player, .hha-trending")) continue;
       hideNode(node, true);
     }
     for (const node of document.querySelectorAll(".hha-sponsored, a[href*='sponsor-content']")) {
@@ -489,7 +489,8 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
         node.closest(".header-highlighted-area__container") ||
         node.closest("li") ||
         node;
-      if (card && !card.querySelector?.("video, audio, #movie_player")) hideNode(card, true);
+      if (card?.querySelector?.(".hha-trending, video, audio, #movie_player")) continue;
+      if (card) hideNode(card, true);
     }
     for (const node of document.querySelectorAll(".item--topic-placeholder")) {
       const video = node.querySelector?.("video");
