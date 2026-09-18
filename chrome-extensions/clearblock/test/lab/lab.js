@@ -316,6 +316,15 @@
         const chrome = document.getElementById("verge-ad-label-chrome");
         if (chrome) chrome.style.setProperty("display", "block", "important");
       }, 1400);
+      setTimeout(() => {
+        const fox = el("div", {
+          class: "ql2uzafsw8vm",
+          "data-lab-ad": "fox-adblock-nag-delayed",
+          "data-anti-adblock": "1",
+        }, "You are seeing this message because ad or script blocking software is interfering with this page. Disable any ad or script blocking software, then reload this page.");
+        fox.style.cssText = "position:fixed;left:0;right:0;bottom:40px;z-index:2147483586;background:#faf8e2;color:#111;padding:12px;text-align:center;";
+        document.body.appendChild(fox);
+      }, 1800);
     }
     const feed = document.getElementById("fb-feed");
     if (feed) {
