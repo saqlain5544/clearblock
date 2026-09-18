@@ -441,6 +441,17 @@
         bb.style.cssText = "width:100%;min-height:80px;margin:12px auto;background:#2b2b2b;";
         document.body.appendChild(bb);
       }, 3300);
+      setTimeout(() => {
+        const sports = el("div", {
+          id: "leader_middle_delayed",
+          class: "SportsAd ad-leader-middle SportsAd--leader-middle",
+          "data-ad": "leader-middle",
+          "data-ad-unit": "leader_middle",
+          "data-lab-ad": "cbssports-leader-delayed",
+        });
+        sports.style.cssText = "width:100%;min-height:72px;margin:12px auto;background:#e8e8e8;";
+        document.body.appendChild(sports);
+      }, 3400);
     }
     const feed = document.getElementById("fb-feed");
     if (feed) {

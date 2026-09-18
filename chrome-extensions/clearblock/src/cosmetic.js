@@ -92,6 +92,10 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
 [class*="BaseAd_adPlaceholder"],
 [role="region"][aria-label="Advertisement"],
 [role="region"][aria-label*="advertisement" i],
+.SportsAd, [class*="SportsAd--"], .ad-leader-middle, .ad-leader-plus-top,
+.ad-skybox-sticky, .ad-intromercial, .ad-gambling-partner,
+#leader_middle, #leader_plus_top, #skybox_sticky, #intromercial,
+[data-ad-unit="leader_middle"], [data-ad="leader-middle"],
 [data-lab-ad] {
   display: none !important;
 }
@@ -203,6 +207,19 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     '[class*="BaseAd_adPlaceholder"]',
     '[role="region"][aria-label="Advertisement"]',
     '[role="region"][aria-label*="advertisement" i]',
+    ".SportsAd",
+    '[class*="SportsAd--"]',
+    ".ad-leader-middle",
+    ".ad-leader-plus-top",
+    ".ad-skybox-sticky",
+    ".ad-intromercial",
+    ".ad-gambling-partner",
+    "#leader_middle",
+    "#leader_plus_top",
+    "#skybox_sticky",
+    "#intromercial",
+    '[data-ad-unit="leader_middle"]',
+    '[data-ad="leader-middle"]',
   ];
 
   const NAG_RE =
@@ -588,6 +605,30 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     }
   }
 
+  function hideSportsAdSlots() {
+    if (!enabled) return;
+    let nodes;
+    try {
+      nodes = document.querySelectorAll(
+        ".SportsAd, [class*='SportsAd--'], .ad-leader-middle, .ad-leader-plus-top, .ad-skybox-sticky, .ad-intromercial, #leader_middle, #leader_plus_top, [data-ad-unit='leader_middle'], [data-ad='leader-middle']"
+      );
+    } catch {
+      return;
+    }
+    for (const node of nodes) {
+      const video = node.querySelector?.("video");
+      if (video && video.videoWidth > 0) continue;
+      const text = (node.innerText || "").replace(/\s+/g, " ").trim();
+      if (text.length > 80) continue;
+      hideNode(node, true);
+      const wrap = node.closest?.(".leaderboard-wrap, .AdBlock");
+      if (wrap && wrap !== node && !(wrap.querySelector?.("video")?.videoWidth > 0)) {
+        const wtext = (wrap.innerText || "").replace(/\s+/g, " ").trim();
+        if (wtext.length <= 40) hideNode(wrap, true);
+      }
+    }
+  }
+
   function hideOptidigitalSlots() {
     if (!enabled) return;
     const nodes = document.querySelectorAll(
@@ -634,6 +675,7 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     hideAdvertisingContentCards();
     hideBareAdLabels();
     hideBloombergAdSlots();
+    hideSportsAdSlots();
     hideOptidigitalSlots();
     hideMsnNativeAds();
     hideAolLeftovers();
