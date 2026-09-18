@@ -113,12 +113,22 @@ fbs-ad, .fbs-ad--top-wrapper, [class*="fbs-ad--"],
 [class*="card--sponsored"],
 [class*="listing__text--sponsored"],
 [class*="sponsorship-disclaimer"],
+[class*="promoted-item"],
+.sponsor-disclosure,
+[class*="ntv-sponsored"],
+[class*="b-sponsor"],
+[class*="aside__sponsor"],
+[class*="right-rail-item__sponsor"],
 li:has(> [class*="card--sponsored"]),
 li:has(> a[class*="card--sponsored"]),
 li:has([class*="listing__text--sponsored"]),
 li:has([class*="sponsorship-disclaimer"]),
+li:has([class*="promoted-item"]),
 [class*="ad-overlay"],
 .js-ad-footer,
+.featured-posts-banner,
+.featured-posts-banner-container,
+#auth0-slas, [data-footer-name="mdb"],
 [data-lab-ad] {
   display: none !important;
 }
@@ -276,10 +286,21 @@ li:has([class*="sponsorship-disclaimer"]),
     "[class*='card--sponsored']",
     "[class*='listing__text--sponsored']",
     "[class*='sponsorship-disclaimer']",
+    "[class*='promoted-item']",
+    ".sponsor-disclosure",
+    "[class*='ntv-sponsored']",
+    "[class*='b-sponsor']",
+    "[class*='aside__sponsor']",
+    "[class*='right-rail-item__sponsor']",
     "li:has(> [class*='card--sponsored'])",
     "li:has(> a[class*='card--sponsored'])",
     "li:has([class*='listing__text--sponsored'])",
     "li:has([class*='sponsorship-disclaimer'])",
+    "li:has([class*='promoted-item'])",
+    ".featured-posts-banner",
+    ".featured-posts-banner-container",
+    "#auth0-slas",
+    "[data-footer-name='mdb']",
   ];
 
   const NAG_RE =
@@ -694,44 +715,6 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     }
   }
 
-  function isCNetSponsoredDealCard(card) {
-    if (!card || card.nodeType !== 1) return false;
-    if (card.matches?.(".zd-featured-deals, .zd-featured-deals__grid, .zd-featured-deals__header")) return false;
-    const name = (card.getAttribute?.("data-zd-track-item-name") || "").trim();
-    if (/^sponsored\s*:/i.test(name)) return true;
-    let title = "";
-    try {
-      title = (card.querySelector?.(":scope .zd-featured-deals__card-title")?.innerText || "").replace(/\s+/g, " ").trim();
-    } catch {
-      title = (card.querySelector?.(".zd-featured-deals__card-title")?.innerText || "").replace(/\s+/g, " ").trim();
-    }
-    return /^sponsored\s*:/i.test(title);
-  }
-
-  function hideCNetSponsoredDeals() {
-    if (!enabled) return;
-    let cards;
-    try {
-      cards = document.querySelectorAll("a.zd-featured-deals__card, .zd-featured-deals__card");
-    } catch {
-      return;
-    }
-    for (const card of cards) {
-      if (!isCNetSponsoredDealCard(card)) continue;
-      if (card.querySelector?.("video")?.videoWidth > 0) continue;
-      hideNode(card, true);
-      const wrap = card.closest?.(".zd-featured-deals__card-wrapper");
-      if (!wrap || wrap === card) continue;
-      if (wrap.matches?.(".zd-featured-deals, .zd-featured-deals__grid, .zd-featured-deals__header")) continue;
-      if (wrap.querySelector?.("video")?.videoWidth > 0) continue;
-      const organic = [...(wrap.querySelectorAll?.(".zd-featured-deals__card") || [])].filter(
-        (other) => other !== card && !isCNetSponsoredDealCard(other)
-      );
-      if (organic.length) continue;
-      hideNode(wrap, true);
-    }
-  }
-
   function hideFoxSportsBetOffers() {
     if (!enabled) return;
     let nodes;
@@ -759,78 +742,6 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
       if (/fairplay|\bOffer\b/i.test(wcls) || wrap.getAttribute?.("data-qa") === "fair-play-component") {
         hideNode(wrap, true);
       }
-    }
-  }
-
-  function hideIndependentSponsoredCards() {
-    if (!enabled) return;
-    let cards;
-    try {
-      cards = document.querySelectorAll("article");
-    } catch {
-      return;
-    }
-    for (const card of cards) {
-      if (card.querySelector?.("video")?.videoWidth > 0) continue;
-      const text = (card.innerText || "").replace(/\s+/g, " ").trim();
-      if (!/^sponsored\b/i.test(text) || text.length > 400) continue;
-      let labeled = false;
-      try {
-        labeled = [...card.querySelectorAll("p, div, span, small")].some((n) =>
-          /^sponsored$/i.test((n.innerText || "").replace(/\s+/g, " ").trim())
-        );
-      } catch {
-        labeled = false;
-      }
-      if (!labeled) continue;
-      hideNode(card, true);
-      const wrap = card.parentElement;
-      if (!wrap || wrap === document.body) continue;
-      if (/^(MAIN|ARTICLE|HEADER|NAV|FOOTER)$/i.test(wrap.tagName)) continue;
-      if (wrap.querySelector?.("video")?.videoWidth > 0) continue;
-      const wtext = (wrap.innerText || "").replace(/\s+/g, " ").trim();
-      if (/latest videos|travel\b|politics|midterms/i.test(wtext)) continue;
-      const organic = [...(wrap.querySelectorAll?.("article") || [])].filter((other) => {
-        if (other === card) return false;
-        const ot = (other.innerText || "").replace(/\s+/g, " ").trim();
-        return ot && !/^sponsored\b/i.test(ot);
-      });
-      if (organic.length) continue;
-      if (wtext.length > 500) continue;
-      hideNode(wrap, true);
-    }
-    let headings;
-    try {
-      headings = document.querySelectorAll("h1, h2, h3, h4, div, section, header");
-    } catch {
-      headings = [];
-    }
-    for (const node of headings) {
-      const text = (node.innerText || "").replace(/\s+/g, " ").trim();
-      if (!/^partner content$/i.test(text)) continue;
-      if (node.querySelector?.("video")?.videoWidth > 0) continue;
-      if (node.querySelector?.("article")) continue;
-      hideNode(node, true);
-    }
-  }
-
-  function hideDailyBeastPartnerCards() {
-    if (!enabled) return;
-    let nodes;
-    try {
-      nodes = document.querySelectorAll(".body-cheat__identifier--branded");
-    } catch {
-      return;
-    }
-    for (const node of nodes) {
-      if (node.querySelector?.("video")?.videoWidth > 0) continue;
-      const card = node.closest("li") || node.parentElement;
-      if (!card || card === document.body) continue;
-      if (/^(MAIN|ARTICLE|HEADER|NAV|FOOTER|UL|OL)$/i.test(card.tagName) && card.tagName !== "LI") continue;
-      if (card.querySelector?.("video")?.videoWidth > 0) continue;
-      const text = (card.innerText || "").replace(/\s+/g, " ").trim();
-      if (/shop with scouted/i.test(text) && !/partner update/i.test(text)) continue;
-      hideNode(card, true);
     }
   }
 
@@ -894,41 +805,8 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     }
   }
 
-  function hideAthleticSponsorSlugs() {
+  function hideCompactSidebarAdSlots() {
     if (!enabled) return;
-    let nodes;
-    try {
-      nodes = document.querySelectorAll('[class*="Content_SponsorSlug"]');
-    } catch {
-      return;
-    }
-    for (const node of nodes) {
-      if (node.querySelector?.("video")?.videoWidth > 0) continue;
-      hideNode(node, true);
-      const card = node.closest("article, li") || node.parentElement;
-      if (!card || card === document.body) continue;
-      if (/^(MAIN|ARTICLE|HEADER|NAV|FOOTER|UL|OL)$/i.test(card.tagName) && card.tagName !== "LI" && card.tagName !== "ARTICLE") continue;
-      if (card.querySelector?.("video")?.videoWidth > 0) continue;
-      const text = (card.innerText || "").replace(/\s+/g, " ").trim();
-      if (text.length > 400) continue;
-      if (!/sponsored by/i.test(text)) continue;
-      hideNode(card, true);
-    }
-  }
-
-  function hideNineToFiveLeftovers() {
-    if (!enabled) return;
-    let banners;
-    try {
-      banners = document.querySelectorAll(".featured-posts-banner, .featured-posts-banner-container");
-    } catch {
-      banners = [];
-    }
-    for (const node of banners) {
-      if (node.querySelector?.("video")?.videoWidth > 0) continue;
-      if (node.matches?.("#river, .river, .river__posts, main, header, nav, footer")) continue;
-      hideNode(node, true);
-    }
     let slots;
     try {
       slots = document.querySelectorAll(".sidebar .hide-sm.no-sticky, aside.sidebar .hide-sm.no-sticky");
@@ -937,99 +815,10 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     }
     for (const node of slots) {
       if (node.querySelector?.("video")?.videoWidth > 0) continue;
+      if (isListingGrid(node)) continue;
       const text = (node.innerText || "").replace(/\s+/g, " ").trim();
       if (!/^ad\b/i.test(text) || text.length > 200) continue;
       hideNode(node, true);
-    }
-    let authors;
-    try {
-      authors = document.querySelectorAll(".author__link, .post-meta");
-    } catch {
-      return;
-    }
-    for (const node of authors) {
-      if (node.querySelector?.("video")?.videoWidth > 0) continue;
-      const text = (node.innerText || "").replace(/\s+/g, " ").trim();
-      if (!/^sponsored post\b/i.test(text)) continue;
-      const card = node.closest("article");
-      if (!card || card === document.body) continue;
-      if (card.matches?.("#river, .river, .river__posts, #content, main, header, nav, footer")) continue;
-      if (card.querySelector?.("video")?.videoWidth > 0) continue;
-      hideNode(card, true);
-    }
-  }
-
-  function hideVentureBeatPartnerCards() {
-    if (!enabled) return;
-    let nodes;
-    try {
-      nodes = document.querySelectorAll(".font-label, [class*='text-editorial-label']");
-    } catch {
-      return;
-    }
-    for (const node of nodes) {
-      if (node.querySelector?.("video")?.videoWidth > 0) continue;
-      const text = (node.innerText || "").replace(/\s+/g, " ").trim();
-      if (!/^partner content$/i.test(text)) continue;
-      const card = node.closest("article");
-      if (!card || card === document.body) continue;
-      if (card.matches?.(".grid, section, main, #vb-homepage, header, nav, footer")) continue;
-      if (card.querySelector?.("video")?.videoWidth > 0) continue;
-      hideNode(card, true);
-    }
-  }
-
-  function hideIgnPromotedItems() {
-    if (!enabled) return;
-    let nodes;
-    try {
-      nodes = document.querySelectorAll(".sponsor-disclosure, .promoted-item, [class*='promoted-item']");
-    } catch {
-      return;
-    }
-    for (const node of nodes) {
-      if (node.querySelector?.("video")?.videoWidth > 0) continue;
-      const cls = typeof node.className === "string" ? node.className : node.getAttribute?.("class") || "";
-      const isCard = /\bpromoted-item\b/.test(cls);
-      if (!isCard) {
-        const text = (node.innerText || "").replace(/\s+/g, " ").trim();
-        if (!node.classList?.contains("sponsor-disclosure") && !/^promoted$/i.test(text)) continue;
-      }
-      const card = isCard ? node : node.closest("[class*='promoted-item'], .content-item");
-      if (!card || card === document.body) continue;
-      if (card.matches?.("section.main-content, .content-feed-grid, .content-feed-grid-wrapper, .homepage-grid, main, header, nav, footer, #main-content")) continue;
-      if (/^(MAIN|SECTION|HEADER|NAV|FOOTER)$/i.test(card.tagName)) continue;
-      if (card.querySelector?.("video")?.videoWidth > 0) continue;
-      hideNode(card, true);
-    }
-  }
-
-  function hideThrillistPartnerCards() {
-    if (!enabled) return;
-    let nodes;
-    try {
-      nodes = document.querySelectorAll(
-        '[class*="UCCSecondaryTag"], [class*="Tagstyles__TagContainer"]'
-      );
-    } catch {
-      return;
-    }
-    for (const node of nodes) {
-      if (node.querySelector?.("video")?.videoWidth > 0) continue;
-      const text = (node.innerText || "").replace(/\s+/g, " ").trim();
-      if (!/^partner content from \b/i.test(text) || text.length > 80) continue;
-      const card = node.closest('[class*="UCCContainer"]');
-      if (!card || card === document.body) continue;
-      if (
-        card.matches?.(
-          '[class*="UCCPatternCardGrid"], [class*="UCCPatternContainer"], #main-content, .homepage, .main-content, main, header, nav, footer, [class*="GridRow"], [class*="GridColumn"]'
-        )
-      ) {
-        continue;
-      }
-      if (/^(MAIN|SECTION|HEADER|NAV|FOOTER)$/i.test(card.tagName)) continue;
-      if (card.querySelector?.("video")?.videoWidth > 0) continue;
-      hideNode(card, true);
     }
   }
 
@@ -1045,7 +834,13 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
       /^(sponsored|promoted)$/i.test(text) ||
       /^sponsor(?:ed)? content created with\b/i.test(text) ||
       /^partner content from\b/i.test(text) ||
-      /^(?:advertising content from|sponsored:\s*content from)\b/i.test(text)
+      /^partner content$/i.test(text) ||
+      /^partner update$/i.test(text) ||
+      /^sponsored post\b/i.test(text) ||
+      /^paid content$/i.test(text) ||
+      /^in partnership with\b/i.test(text) ||
+      /^(?:advertising content from|sponsored:\s*content from)\b/i.test(text) ||
+      /^sponsored\s*:/i.test(text)
     );
   }
 
@@ -1053,7 +848,7 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     if (!node) return true;
     if (/^(MAIN|SECTION|HEADER|NAV|FOOTER|UL|OL|BODY|HTML)$/i.test(node.tagName)) return true;
     return !!node.matches?.(
-      "ul, ol, main, header, nav, footer, #main-content, .homepage, .main-content, .top-stories, .top-stories__cards, .card-list, .mntl-carousel, .mntl-carousel__items, .mntl-carousel__wrapper, .wdn-listv2-items, .wdn-listv2-item-lists, .wdn-listv2-item-wrapper, [class*='UCCPatternCardGrid'], [class*='UCCPatternContainer'], [class*='GridRow'], [class*='content-feed-grid']"
+      "ul, ol, main, header, nav, footer, #main-content, .homepage, .main-content, .top-stories, .top-stories__cards, .card-list, .mntl-carousel, .mntl-carousel__items, .mntl-carousel__wrapper, .wdn-listv2-items, .wdn-listv2-item-lists, .wdn-listv2-item-wrapper, [class*='UCCPatternCardGrid'], [class*='UCCPatternContainer'], [class*='GridRow'], [class*='content-feed-grid'], .content-feed-grid, .content-feed-grid-wrapper, .homepage-grid, .zd-featured-deals, .zd-featured-deals__grid, .zd-featured-deals__header, .b-right-rail, .b-right-rail__inner, .b-aside, .b-river, .b-river__list, .HomepagePromos, .HomepagePromos__row, .Carousel, .Carousel__Inner, .Carousel__Outer, .Carousel__Wrapper, .CarouselModule, .GridListContainer, #firehoselist, #firehose, #slashboxes, #river, .river, .river__posts, #vb-homepage, .bc_right_sidebar, .bc_main_content, .bc_wrapper"
     );
   }
 
@@ -1066,7 +861,7 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
       if (isListingGrid(el)) return found;
       const cls = typeof el.className === "string" ? el.className : el.getAttribute?.("class") || "";
       const tagged =
-        /card--sponsored|sponsored-post|promoted-item|UCCContainer|wdn-listv2-item|card-list__item|mntl-carousel__item|beauty-card|mntl-card|content-item/i.test(
+        /card--sponsored|sponsored-post|promoted-item|UCCContainer|wdn-listv2-item|card-list__item|mntl-carousel__item|beauty-card|mntl-card|content-item|zd-featured-deals__card|b-right-rail-item|b-aside__item|CarouselSlide|RegularStandardPrismTile|HomepagePromos__promo|ListItemWrapper|fhitem|identifier--branded|ntv-sponsored|ntv_link/i.test(
           cls
         );
       const item = /^(LI|ARTICLE)$/i.test(el.tagName) || (el.tagName === "A" && /card/i.test(cls));
@@ -1082,7 +877,7 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     let classHits;
     try {
       classHits = document.querySelectorAll(
-        "[class*='card--sponsored'], [class*='listing__text--sponsored'], [class*='sponsorship-disclaimer'], [class*='sponsored-post']"
+        "[class*='card--sponsored'], [class*='listing__text--sponsored'], [class*='sponsorship-disclaimer'], [class*='sponsored-post'], [class*='promoted-item'], .sponsor-disclosure, [class*='SponsorSlug'], [class*='identifier--branded'], [class*='ntv-sponsored'], [class*='ntv_link'], [class*='b-sponsor'], [class*='aside__sponsor'], [class*='right-rail-item__sponsor'], [data-zd-track-item-name^='Sponsored'], [data-zd-track-item-name^='sponsored'], [class*='hha-sponsored']"
       );
     } catch {
       classHits = [];
@@ -1097,7 +892,7 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     }
     let labels;
     try {
-      labels = document.querySelectorAll("span, div, p, small, a, figcaption, li");
+      labels = document.querySelectorAll("span, div, p, small, a, figcaption, li, h1, h2, h3, h4, header");
     } catch {
       return;
     }
@@ -1116,7 +911,16 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
       if (text.length > 80 && !isSponsoredListingCopy(text)) continue;
       if (node.querySelector?.("video")?.videoWidth > 0) continue;
       const card = sponsoredListingCard(node);
-      if (!card || seen.has(card) || isListingGrid(card)) continue;
+      if (!card || seen.has(card) || isListingGrid(card)) {
+        if (
+          !card &&
+          /^(H1|H2|H3|H4|HEADER)$/i.test(node.tagName) &&
+          !node.querySelector?.("article, a, li, video")
+        ) {
+          hideNode(node, true);
+        }
+        continue;
+      }
       seen.add(card);
       hideNode(card, true);
     }
@@ -1127,7 +931,7 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     let nodes;
     try {
       nodes = document.querySelectorAll(
-        "[class*='ad-overlay'], [class*='ad-footer'], .js-ad-footer, .c-main-footer__ad-overlay"
+        "[class*='ad-overlay'], [class*='ad-footer'], .js-ad-footer, .c-main-footer__ad-overlay, .featured-posts-banner, .featured-posts-banner-container, #auth0-slas, [data-footer-name='mdb']"
       );
     } catch {
       return;
@@ -1139,153 +943,6 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
       const text = (node.innerText || "").replace(/\s+/g, " ").trim();
       if (text.length > 160 && !/advertisement/i.test(text)) continue;
       hideNode(node, true);
-    }
-  }
-
-  function hideVg247SponsoredCards() {
-    if (!enabled) return;
-    let nodes;
-    try {
-      nodes = document.querySelectorAll("span.kicker, .kicker_wrapper .kicker");
-    } catch {
-      return;
-    }
-    for (const node of nodes) {
-      if (node.querySelector?.("video")?.videoWidth > 0) continue;
-      const text = (node.innerText || "").replace(/\s+/g, " ").trim();
-      if (!/^sponsored$/i.test(text) || text.length > 24) continue;
-      const card = node.closest("li");
-      if (!card || card === document.body) continue;
-      if (
-        card.matches?.(
-          "ul.primary, ul, ol, main, header, nav, footer, #main-content, .homepage, .listing"
-        )
-      ) {
-        continue;
-      }
-      if (/^(MAIN|SECTION|HEADER|NAV|FOOTER|UL|OL)$/i.test(card.tagName)) continue;
-      if (card.querySelector?.("video")?.videoWidth > 0) continue;
-      hideNode(card, true);
-    }
-  }
-
-  function hideSlashdotLeftovers() {
-    if (!enabled) return;
-    let stickies;
-    try {
-      stickies = document.querySelectorAll("#auth0-slas, [data-footer-name='mdb']");
-    } catch {
-      stickies = [];
-    }
-    for (const node of stickies) {
-      if (node.querySelector?.("video")?.videoWidth > 0) continue;
-      hideNode(node, true);
-    }
-    let nodes;
-    try {
-      nodes = document.querySelectorAll(".ntv-sponsored-disclaimer, [class*='ntv-sponsored'], [class*='ntv_link']");
-    } catch {
-      return;
-    }
-    for (const node of nodes) {
-      if (node.querySelector?.("video")?.videoWidth > 0) continue;
-      const card = node.closest("article") || node.closest(".fhitem");
-      if (!card || card === document.body) continue;
-      if (/^(MAIN|HEADER|NAV|FOOTER|UL|OL|ASIDE)$/i.test(card.tagName) && card.tagName !== "ARTICLE") continue;
-      if (card.id === "firehoselist" || card.id === "firehose" || card.id === "slashboxes") continue;
-      if (card.querySelector?.("video")?.videoWidth > 0) continue;
-      hideNode(card, true);
-    }
-  }
-
-  function hideDigitalTrendsSponsored() {
-    if (!enabled) return;
-    let nodes;
-    try {
-      nodes = document.querySelectorAll(".b-sponsor, .b-right-rail-item__sponsor");
-    } catch {
-      return;
-    }
-    for (const node of nodes) {
-      if (node.querySelector?.("video")?.videoWidth > 0) continue;
-      const text = (node.innerText || "").replace(/\s+/g, " ").trim();
-      if (text && !/^sponsored\b/i.test(text) && text.length > 80) continue;
-      const card = node.closest(".b-right-rail-item");
-      if (!card || card === document.body) continue;
-      if (card.matches?.(".b-right-rail, .b-right-rail__inner, section, main, header, nav, footer")) continue;
-      if (card.querySelector?.("video")?.videoWidth > 0) continue;
-      hideNode(card, true);
-    }
-    let sponsors;
-    try {
-      sponsors = document.querySelectorAll(".b-aside__sponsor");
-    } catch {
-      return;
-    }
-    for (const node of sponsors) {
-      if (node.querySelector?.("video")?.videoWidth > 0) continue;
-      const text = (node.innerText || "").replace(/\s+/g, " ").trim();
-      if (!/^in partnership with\b/i.test(text)) continue;
-      const card = node.closest(".b-aside__item");
-      if (!card || card === document.body) continue;
-      if (card.matches?.(".b-aside, .b-river, .b-river__list, section, main, header, nav, footer")) continue;
-      if (card.querySelector?.("video")?.videoWidth > 0) continue;
-      hideNode(card, true);
-    }
-    let asides;
-    try {
-      asides = document.querySelectorAll(".b-aside");
-    } catch {
-      return;
-    }
-    for (const aside of asides) {
-      if (!aside.querySelector?.(".b-aside__sponsor")) continue;
-      const items = [...aside.querySelectorAll(".b-aside__item")];
-      if (!items.length) continue;
-      const allPartner = items.every((item) => {
-        const slug = item.querySelector(".b-aside__sponsor");
-        const t = (slug?.innerText || "").replace(/\s+/g, " ").trim();
-        const s = getComputedStyle(item);
-        return /^in partnership with\b/i.test(t) || s.display === "none";
-      });
-      if (!allPartner) continue;
-      if (aside.matches?.(".b-river, .b-river__list, main, header, nav, footer")) continue;
-      if (aside.querySelector?.("video")?.videoWidth > 0) continue;
-      hideNode(aside, true);
-    }
-  }
-
-  function hideNatGeoPaidContent() {
-    if (!enabled) return;
-    let nodes;
-    try {
-      nodes = document.querySelectorAll(
-        ".TextBadge.promoted, .ListItem__TagWrapper, .label, .SectionLabel, .SectionLabelWrapper, .RegularStandardPrismTile__SectionLabel"
-      );
-    } catch {
-      return;
-    }
-    for (const node of nodes) {
-      if (node.querySelector?.("video")?.videoWidth > 0) continue;
-      const text = (node.innerText || "").replace(/\s+/g, " ").trim();
-      if (!/^paid content$/i.test(text)) continue;
-      const card =
-        node.closest(".CarouselSlide") ||
-        node.closest(".RegularStandardPrismTile") ||
-        node.closest(".HomepagePromos__promo") ||
-        node.closest(".ListItemWrapper") ||
-        node.closest(".ListItem");
-      if (!card || card === document.body) continue;
-      if (
-        card.matches?.(
-          ".HomepagePromos__row, .HomepagePromos, .GridListContainer, .PageLayout__Main, .Carousel__Inner, .Carousel__Outer, .Carousel__Wrapper, .Carousel, .CarouselModule, .CarouselModule__CarouselContainer, ul, ol, main, header, nav, footer"
-        )
-      ) {
-        continue;
-      }
-      if (/^(UL|OL)$/i.test(card.tagName)) continue;
-      if (card.querySelector?.("video")?.videoWidth > 0) continue;
-      hideNode(card, true);
     }
   }
 
@@ -1416,23 +1073,12 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     hideBareAdLabels();
     hidePogoSlots();
     hideBegeninSlots();
-    hideCNetSponsoredDeals();
     hideFoxSportsBetOffers();
     hideForbesAdSlots();
-    hideIndependentSponsoredCards();
-    hideDailyBeastPartnerCards();
     hideBleepingComputerLeftovers();
-    hideAthleticSponsorSlugs();
-    hideNineToFiveLeftovers();
-    hideVentureBeatPartnerCards();
-    hideIgnPromotedItems();
-    hideThrillistPartnerCards();
-    hideVg247SponsoredCards();
+    hideCompactSidebarAdSlots();
     hideSponsoredListingCards();
     hideStickyAdOverlays();
-    hideSlashdotLeftovers();
-    hideDigitalTrendsSponsored();
-    hideNatGeoPaidContent();
     hideBloombergAdSlots();
     hideSportsAdSlots();
     hideOptidigitalSlots();
