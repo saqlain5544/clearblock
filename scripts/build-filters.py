@@ -231,6 +231,17 @@ YOUTUBE_AND_CORE = [
     "||www.googleadservices.com^",
     "||pagead.googlesyndication.com^",
     "||adtrafficquality.google^",
+    "||an.facebook.com^",
+    "||pixel.facebook.com^",
+    "||ads.twitter.com^",
+    "||snap.licdn.com^",
+    "||ads.yieldmo.com^",
+    "||yieldmo.com^",
+    "||s.yimg.com/rq/darla",
+    "||bat.bing.com^",
+    "||googletagmanager.com/gtag/js?id=AW",
+    "||google-analytics.com^",
+    "||facebook.com/tr",
 ]
 
 KEYWORD_RE = re.compile(
