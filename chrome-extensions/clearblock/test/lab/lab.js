@@ -719,6 +719,46 @@
         carousel.appendChild(paidSlide);
         document.body.appendChild(carousel);
       }, 5150);
+      setTimeout(() => {
+        const section = el("section", { "data-lab-content": "vb-infra-delayed" });
+        section.style.cssText = "max-width:1020px;margin:12px auto;background:#fff;color:#111;padding:8px;";
+        const grid = el("div", { class: "grid lg:grid-cols-4" });
+        const organic = el("article", { "data-lab-content": "vb-organic-delayed" });
+        organic.textContent = "Cohere's Model Vault now encrypts AI inference";
+        const partner = el("article", {
+          class: "flex flex-col gap-12",
+          "data-lab-ad": "venturebeat-partner-delayed",
+        });
+        const slug = el("p", { class: "font-label text-editorial-label-030" });
+        slug.textContent = "PARTNER CONTENT";
+        partner.appendChild(slug);
+        partner.appendChild(document.createTextNode(" AI agents are breaking the batch-era assumptions behind object storage"));
+        partner.style.cssText = "min-height:72px;background:#eee;padding:8px;";
+        grid.appendChild(organic);
+        grid.appendChild(partner);
+        section.appendChild(grid);
+        document.body.appendChild(section);
+      }, 5200);
+      setTimeout(() => {
+        const river = el("div", { class: "river__posts", "data-lab-content": "ninefivegoogle-river-delayed" });
+        river.style.cssText = "max-width:777px;margin:12px auto;background:#fff;color:#111;padding:8px;";
+        const organic = el("article", { class: "article standard", "data-lab-content": "ninefivegoogle-editorial-delayed" });
+        organic.textContent = "Google Keep update tweaks the homescreen widget on Android Abner Li";
+        const sponsored = el("article", {
+          class: "article standard",
+          "data-lab-ad": "ninefivegoogle-sponsored-delayed",
+        });
+        sponsored.appendChild(document.createTextNode("I swapped my outdoor lantern bulbs for Linkind’s Smart Light Stick "));
+        const meta = el("div", { class: "post-meta flex" });
+        const author = el("span", { class: "author__link" });
+        author.textContent = "Sponsored Post";
+        meta.appendChild(author);
+        sponsored.appendChild(meta);
+        sponsored.style.cssText = "min-height:72px;background:#eee;padding:8px;";
+        river.appendChild(organic);
+        river.appendChild(sponsored);
+        document.body.appendChild(river);
+      }, 5250);
     }
     const feed = document.getElementById("fb-feed");
     if (feed) {

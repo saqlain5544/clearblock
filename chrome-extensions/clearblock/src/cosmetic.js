@@ -921,6 +921,42 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
       if (!/^ad\b/i.test(text) || text.length > 200) continue;
       hideNode(node, true);
     }
+    let authors;
+    try {
+      authors = document.querySelectorAll(".author__link, .post-meta");
+    } catch {
+      return;
+    }
+    for (const node of authors) {
+      if (node.querySelector?.("video")?.videoWidth > 0) continue;
+      const text = (node.innerText || "").replace(/\s+/g, " ").trim();
+      if (!/^sponsored post\b/i.test(text)) continue;
+      const card = node.closest("article");
+      if (!card || card === document.body) continue;
+      if (card.matches?.("#river, .river, .river__posts, #content, main, header, nav, footer")) continue;
+      if (card.querySelector?.("video")?.videoWidth > 0) continue;
+      hideNode(card, true);
+    }
+  }
+
+  function hideVentureBeatPartnerCards() {
+    if (!enabled) return;
+    let nodes;
+    try {
+      nodes = document.querySelectorAll(".font-label, [class*='text-editorial-label']");
+    } catch {
+      return;
+    }
+    for (const node of nodes) {
+      if (node.querySelector?.("video")?.videoWidth > 0) continue;
+      const text = (node.innerText || "").replace(/\s+/g, " ").trim();
+      if (!/^partner content$/i.test(text)) continue;
+      const card = node.closest("article");
+      if (!card || card === document.body) continue;
+      if (card.matches?.(".grid, section, main, #vb-homepage, header, nav, footer")) continue;
+      if (card.querySelector?.("video")?.videoWidth > 0) continue;
+      hideNode(card, true);
+    }
   }
 
   function hideSlashdotLeftovers() {
@@ -1178,6 +1214,7 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     hideBleepingComputerLeftovers();
     hideAthleticSponsorSlugs();
     hideNineToFiveLeftovers();
+    hideVentureBeatPartnerCards();
     hideSlashdotLeftovers();
     hideDigitalTrendsSponsored();
     hideNatGeoPaidContent();
