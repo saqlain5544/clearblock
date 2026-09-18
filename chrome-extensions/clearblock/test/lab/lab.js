@@ -853,6 +853,19 @@
         list.appendChild(sponsored);
         document.body.appendChild(list);
       }, 5550);
+      setTimeout(() => {
+        const list = el("ul", { class: "top-stories__cards card-list", "data-lab-content": "byrdie-grid-delayed" });
+        list.style.cssText = "max-width:1200px;margin:12px auto;background:#fff;color:#111;padding:8px;list-style:none;display:flex;gap:12px;";
+        const organic = el("li", { class: "card-list__item", "data-lab-content": "byrdie-editorial-delayed" });
+        organic.textContent = "These 24 Nude Nail Ideas for Fall";
+        const sponsored = el("li", { class: "card-list__item", "data-lab-ad": "byrdie-sponsored-delayed" });
+        sponsored.style.cssText = "min-height:72px;background:#eee;padding:8px;";
+        sponsored.innerHTML =
+          '<a class="card card--sponsored" href="#dove"><div class="card__media mntl-image card__media universal-image__container">Sponsored</div>This $13 Dove Oil Body Wash Is My Secret to Glowy Skin</a>';
+        list.appendChild(organic);
+        list.appendChild(sponsored);
+        document.body.appendChild(list);
+      }, 5600);
     }
     const feed = document.getElementById("fb-feed");
     if (feed) {

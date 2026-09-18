@@ -112,6 +112,10 @@ fbs-ad, .fbs-ad--top-wrapper, [class*="fbs-ad--"],
 [class*="Content_SponsorSlug"],
 li.wdn-listv2-item:has(.listing__text--sponsored),
 li.wdn-listv2-item:has(.listing__text--sponsorship-disclaimer),
+a.card--sponsored,
+.card--sponsored,
+li.card-list__item:has(.card--sponsored),
+li.mntl-carousel__item:has(.card--sponsored),
 [data-lab-ad] {
   display: none !important;
 }
@@ -267,6 +271,10 @@ li.wdn-listv2-item:has(.listing__text--sponsorship-disclaimer),
     ".js-ad-footer",
     "li.wdn-listv2-item:has(.listing__text--sponsored)",
     "li.wdn-listv2-item:has(.listing__text--sponsorship-disclaimer)",
+    "a.card--sponsored",
+    ".card--sponsored",
+    "li.card-list__item:has(.card--sponsored)",
+    "li.mntl-carousel__item:has(.card--sponsored)",
   ];
 
   const NAG_RE =
@@ -1020,6 +1028,33 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     }
   }
 
+  function hideByrdieSponsoredCards() {
+    if (!enabled) return;
+    let nodes;
+    try {
+      nodes = document.querySelectorAll("a.card--sponsored, .card--sponsored");
+    } catch {
+      return;
+    }
+    for (const node of nodes) {
+      if (node.querySelector?.("video")?.videoWidth > 0) continue;
+      const card =
+        node.closest("li.card-list__item, li.mntl-carousel__item") ||
+        (node.matches?.("a.card--sponsored, .card--sponsored") ? node : null);
+      if (!card || card === document.body) continue;
+      if (
+        card.matches?.(
+          "ul, ol, main, header, nav, footer, #main-content, .homepage, .main-content, .top-stories, .top-stories__cards, .card-list, .mntl-carousel, .mntl-carousel__items, .mntl-carousel__wrapper"
+        )
+      ) {
+        continue;
+      }
+      if (/^(MAIN|SECTION|HEADER|NAV|FOOTER|UL|OL)$/i.test(card.tagName)) continue;
+      if (card.querySelector?.("video")?.videoWidth > 0) continue;
+      hideNode(card, true);
+    }
+  }
+
   function hideWhoWhatWearSponsorCards() {
     if (!enabled) return;
     let nodes;
@@ -1358,6 +1393,7 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     hideThrillistPartnerCards();
     hideVg247SponsoredCards();
     hideWhoWhatWearSponsorCards();
+    hideByrdieSponsoredCards();
     hideTacFooterAdOverlay();
     hideSlashdotLeftovers();
     hideDigitalTrendsSponsored();
