@@ -489,6 +489,16 @@
         wrap.appendChild(card);
         document.body.appendChild(wrap);
       }, 3700);
+      setTimeout(() => {
+        const offer = el("div", {
+          class: "fairplay-container Offer right-rail-component",
+          "data-qa": "fair-play-component",
+          "data-lab-ad": "foxsports-betmgm-delayed",
+        });
+        offer.textContent = "$50 BetMGM Bonus + $1500 CLAIM";
+        offer.style.cssText = "width:300px;min-height:72px;margin:12px auto;background:#111;color:#fff;padding:8px;";
+        document.body.appendChild(offer);
+      }, 3800);
     }
     const feed = document.getElementById("fb-feed");
     if (feed) {

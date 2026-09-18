@@ -102,6 +102,8 @@ a.zd-featured-deals__card[data-zd-track-item-name^="Sponsored:"],
 a.zd-featured-deals__card[data-zd-track-item-name^="sponsored:"],
 .zd-featured-deals__card[data-zd-track-item-name^="Sponsored:"],
 .zd-featured-deals__card[data-zd-track-item-name^="sponsored:"],
+.fairplay-container, .fairplay-container.Offer, [data-qa="fair-play-component"],
+oc-connect-widget,
 [data-lab-ad] {
   display: none !important;
 }
@@ -239,6 +241,10 @@ a.zd-featured-deals__card[data-zd-track-item-name^="sponsored:"],
     'a.zd-featured-deals__card[data-zd-track-item-name^="sponsored:"]',
     '.zd-featured-deals__card[data-zd-track-item-name^="Sponsored:"]',
     '.zd-featured-deals__card[data-zd-track-item-name^="sponsored:"]',
+    ".fairplay-container",
+    ".fairplay-container.Offer",
+    '[data-qa="fair-play-component"]',
+    "oc-connect-widget",
   ];
 
   const NAG_RE =
@@ -686,6 +692,36 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     }
   }
 
+  function hideFoxSportsBetOffers() {
+    if (!enabled) return;
+    let nodes;
+    try {
+      nodes = document.querySelectorAll(
+        '.fairplay-container, [data-qa="fair-play-component"], oc-connect-widget'
+      );
+    } catch {
+      return;
+    }
+    for (const node of nodes) {
+      if (node.querySelector?.("video")?.videoWidth > 0) continue;
+      const cls = typeof node.className === "string" ? node.className : node.getAttribute?.("class") || "";
+      if (/headlines-comp|newsletter|layout-content-container|right-rail-content|fscom-main|featured/i.test(cls)) continue;
+      const text = (node.innerText || "").replace(/\s+/g, " ").trim();
+      if (/featured stories/i.test(text) && text.length > 120) continue;
+      hideNode(node, true);
+      const wrap = node.parentElement;
+      if (!wrap || wrap === document.body) continue;
+      const wcls = typeof wrap.className === "string" ? wrap.className : wrap.getAttribute?.("class") || "";
+      if (/right-rail-content|layout-content-container|fscom-main-content|body-content|home wide/i.test(wcls)) continue;
+      if (wrap.querySelector?.("video")?.videoWidth > 0) continue;
+      const wtext = (wrap.innerText || "").replace(/\s+/g, " ").trim();
+      if (/featured stories/i.test(wtext)) continue;
+      if (/fairplay|\bOffer\b/i.test(wcls) || wrap.getAttribute?.("data-qa") === "fair-play-component") {
+        hideNode(wrap, true);
+      }
+    }
+  }
+
   function hideBloombergAdSlots() {
     if (!enabled) return;
     let nodes;
@@ -790,6 +826,7 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     hidePogoSlots();
     hideBegeninSlots();
     hideCNetSponsoredDeals();
+    hideFoxSportsBetOffers();
     hideBloombergAdSlots();
     hideSportsAdSlots();
     hideOptidigitalSlots();
