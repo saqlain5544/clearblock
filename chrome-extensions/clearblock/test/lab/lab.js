@@ -402,6 +402,34 @@
         sticky.style.cssText = "position:fixed;left:0;right:0;bottom:110px;z-index:500;height:72px;background:#bbb;";
         document.body.appendChild(sticky);
       }, 2900);
+      setTimeout(() => {
+        const hill = el("div", {
+          class: "header-highlighted-area__container",
+          "data-lab-ad": "hill-sponsored-delayed",
+        });
+        hill.style.cssText = "max-width:280px;margin:12px auto;min-height:40px;background:#eef;";
+        hill.appendChild(el("h2", { class: "header-highlighted-area__title hha-sponsored" }, "Sponsored:"));
+        hill.appendChild(el("a", { href: "/sponsor-content/delayed" }, "Content from Third Way delayed"));
+        document.body.appendChild(hill);
+      }, 3000);
+      setTimeout(() => {
+        const cbs = el("article", {
+          class: "item item--type-live item--topic-placeholder",
+          "data-lab-ad": "cbs-live-delayed",
+        });
+        cbs.style.cssText = "width:300px;height:80px;margin:12px auto;background:#111;";
+        document.body.appendChild(cbs);
+      }, 3100);
+      setTimeout(() => {
+        const bbc = el("div", {
+          "data-testid": "ad-unit",
+          "data-component": "ad-slot",
+          "data-lab-ad": "bbc-dotcom-delayed",
+        });
+        bbc.style.cssText = "width:100%;min-height:80px;margin:12px auto;background:#f6f6f6;";
+        bbc.appendChild(el("div", { id: "dotcom-top-delayed", class: "dotcom-ad" }, "Delayed BBC leftover masthead"));
+        document.body.appendChild(bbc);
+      }, 3200);
     }
     const feed = document.getElementById("fb-feed");
     if (feed) {

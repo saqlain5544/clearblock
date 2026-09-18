@@ -82,6 +82,10 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
 [id^="nativead-"],
 .ad-banner-wrapper, .display-ads-container,
 .ad-slug, .sponsored-text.ad-label, a.ad-label-text,
+.hha-sponsored, .header-highlighted-area__container:has(.hha-sponsored),
+.header-highlighted-area__container:has(a[href*="sponsor-content"]),
+.item--topic-placeholder,
+[data-testid="ad-unit"], [data-component="ad-slot"], .dotcom-ad, #dotcom-top,
 [data-lab-ad] {
   display: none !important;
 }
@@ -175,6 +179,14 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     ".ad-slug",
     ".sponsored-text.ad-label",
     "a.ad-label-text",
+    ".hha-sponsored",
+    ".header-highlighted-area__container:has(.hha-sponsored)",
+    ".header-highlighted-area__container:has(a[href*='sponsor-content'])",
+    ".item--topic-placeholder",
+    "[data-testid='ad-unit']",
+    "[data-component='ad-slot']",
+    ".dotcom-ad",
+    "#dotcom-top",
   ];
 
   const NAG_RE =
@@ -462,13 +474,26 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
 
   function hideAdvertisingContentCards() {
     if (!enabled) return;
-    const nodes = document.querySelectorAll("div, article, aside, section");
+    const nodes = document.querySelectorAll("div, article, aside, section, li");
     for (const node of nodes) {
       const raw = node.textContent;
       if (!raw || raw.length > 1600) continue;
-      if (!/advertising content from/i.test(raw)) continue;
+      if (!/advertising content from|sponsored:\s*content from/i.test(raw)) continue;
       const text = raw.replace(/\s+/g, " ").trim();
-      if (!/\badvertising content from\b/i.test(text.slice(0, 120))) continue;
+      if (!/\b(?:advertising content from|sponsored:\s*content from)\b/i.test(text.slice(0, 120))) continue;
+      if (node.querySelector?.("video, audio, #movie_player")) continue;
+      hideNode(node, true);
+    }
+    for (const node of document.querySelectorAll(".hha-sponsored, a[href*='sponsor-content']")) {
+      const card =
+        node.closest(".header-highlighted-area__container") ||
+        node.closest("li") ||
+        node;
+      if (card && !card.querySelector?.("video, audio, #movie_player")) hideNode(card, true);
+    }
+    for (const node of document.querySelectorAll(".item--topic-placeholder")) {
+      const video = node.querySelector?.("video");
+      if (video && video.videoWidth > 0) continue;
       hideNode(node, true);
     }
   }
