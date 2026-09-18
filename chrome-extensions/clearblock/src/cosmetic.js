@@ -65,7 +65,7 @@ iframe[id^="google_ads_iframe"],
 .m-ad, .m-ad__dynamic_ad_unit, [class*="m-ad__dynamic"], [class*="m-ad__desktop"],
 [class*="m-ad__medium_rectangle"], [class*="m-ad__sponsored"],
 [class*="duet--ad-container"],
-[class*="admiral"], .admiral-unit,
+[class*="admiral"], .admiral-unit, .fEy1Z2XT,
 [data-optidigital-slot], [id^="optidigital-adslot-"], .optidigital-wrapper-div,
 .min-h-\\[250px\\]:has([data-optidigital-slot]),
 .min-h-\\[350px\\]:has([data-optidigital-slot]),
@@ -174,6 +174,7 @@ fbs-ad, .fbs-ad--top-wrapper, [class*="fbs-ad--"],
     "[class*='duet--ad-container']",
     "[class*='admiral']",
     ".admiral-unit",
+    ".fEy1Z2XT",
     "[data-optidigital-slot]",
     "[id^='optidigital-adslot-']",
     ".optidigital-wrapper-div",
@@ -263,7 +264,7 @@ fbs-ad, .fbs-ad--top-wrapper, [class*="fbs-ad--"],
   ];
 
   const NAG_RE =
-    /disable (your |my |any )?ad.?block|disabl(?:e|ing) .{0,40}ad.?block|turn(?:ing)? off .{0,40}ad.?block|whitelist (this|our|the) (site|ad)|allowlist .{0,48}|ad blockers? (are|is) not allowed|please (disable|turn off|whitelist).{0,24}ad.?block|allowed on youtube|allowing ads|\ballow ads\b|using (an |your |a )?ad.?block|continue using your ad blocker|support .{0,40}by allowing ads|ad or script blocking|script blocking software|interfering with this page|disable .{0,40}blocking software|it looks like you.?re using an ad.?block|powered by admiral/i;
+    /disable (your |my |any )?ad.?block|disabl(?:e|ing) .{0,40}ad.?block|turn(?:ing)? off .{0,40}ad.?block|whitelist (this|our|the) (site|ad)|allowlist .{0,48}|ad blockers? (are|is) not allowed|please (disable|turn off|whitelist).{0,24}ad.?block|allowed on youtube|allowing ads|\ballow ads\b|using (an |your |a )?ad.?block|continue using your ad blocker|support .{0,60}by (allowing|enabling) ads|by enabling ads|ad or script blocking|script blocking software|interfering with this page|disable .{0,40}blocking software|it looks like you.?re using an ad.?block|powered by admiral/i;
 
   const PROTECT_TAGS = new Set(["VIDEO", "AUDIO", "SOURCE", "TRACK", "CANVAS"]);
 
@@ -463,7 +464,7 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
       if (node.closest?.("[data-lab-content], #movie_player, video, article.web-article, .fb-post[data-lab-content]")) {
         continue;
       }
-      const text = (node.innerText || node.textContent || "").replace(/\s+/g, " ").slice(0, 420);
+      const text = (node.innerText || node.textContent || "").replace(/\s+/g, " ").slice(0, 1200);
       if (!NAG_RE.test(text)) continue;
       if (/sign in to confirm you.?re not a bot|confirm you.?re not a bot/i.test(text)) continue;
       const style = node.ownerDocument.defaultView.getComputedStyle(node);
@@ -984,6 +985,35 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     }
   }
 
+  function hideThrillistPartnerCards() {
+    if (!enabled) return;
+    let nodes;
+    try {
+      nodes = document.querySelectorAll(
+        '[class*="UCCSecondaryTag"], [class*="Tagstyles__TagContainer"]'
+      );
+    } catch {
+      return;
+    }
+    for (const node of nodes) {
+      if (node.querySelector?.("video")?.videoWidth > 0) continue;
+      const text = (node.innerText || "").replace(/\s+/g, " ").trim();
+      if (!/^partner content from \b/i.test(text) || text.length > 80) continue;
+      const card = node.closest('[class*="UCCContainer"]');
+      if (!card || card === document.body) continue;
+      if (
+        card.matches?.(
+          '[class*="UCCPatternCardGrid"], [class*="UCCPatternContainer"], #main-content, .homepage, .main-content, main, header, nav, footer, [class*="GridRow"], [class*="GridColumn"]'
+        )
+      ) {
+        continue;
+      }
+      if (/^(MAIN|SECTION|HEADER|NAV|FOOTER)$/i.test(card.tagName)) continue;
+      if (card.querySelector?.("video")?.videoWidth > 0) continue;
+      hideNode(card, true);
+    }
+  }
+
   function hideSlashdotLeftovers() {
     if (!enabled) return;
     let stickies;
@@ -1241,6 +1271,7 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     hideNineToFiveLeftovers();
     hideVentureBeatPartnerCards();
     hideIgnPromotedItems();
+    hideThrillistPartnerCards();
     hideSlashdotLeftovers();
     hideDigitalTrendsSponsored();
     hideNatGeoPaidContent();

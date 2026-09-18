@@ -777,6 +777,30 @@
         feed.appendChild(promoted);
         document.body.appendChild(feed);
       }, 5300);
+      setTimeout(() => {
+        const grid = el("div", {
+          class: "UCCPatternstyles__UCCPatternCardGrid-sc-7uvllb-1",
+          "data-lab-content": "thrillist-grid-delayed",
+        });
+        grid.style.cssText = "max-width:1200px;margin:12px auto;background:#fff;color:#111;padding:8px;";
+        const organic = el("div", {
+          class: "UniversalContentCardstyles__UCCContainer-sc-zezg1y-8",
+          "data-lab-content": "thrillist-editorial-delayed",
+        });
+        organic.textContent = "The Ultimate Weekend in Atlanta For a Sports Fan";
+        const partner = el("div", {
+          class: "UniversalContentCardstyles__UCCContainer-sc-zezg1y-8",
+          "data-lab-ad": "thrillist-partner-delayed",
+        });
+        const slug = el("div", { class: "UniversalContentCardstyles__UCCSecondaryTag-sc-zezg1y-6" });
+        slug.textContent = "PARTNER CONTENT FROM RING";
+        partner.appendChild(slug);
+        partner.appendChild(document.createTextNode(" Holiday From Anywhere with Ring"));
+        partner.style.cssText = "min-height:72px;background:#eee;padding:8px;";
+        grid.appendChild(organic);
+        grid.appendChild(partner);
+        document.body.appendChild(grid);
+      }, 5350);
     }
     const feed = document.getElementById("fb-feed");
     if (feed) {
