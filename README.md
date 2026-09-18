@@ -19,12 +19,12 @@ Counts and settings live in `chrome.storage.local` on this device and survive Ch
 
 ## Put it on your Mac
 
-The folder Chrome loads is `chrome-extensions/clearblock` in this repo (the directory that contains `manifest.json`).
+The folder Chrome loads is `chrome-extensions/clearblock` (the directory that contains `manifest.json`). Repo: [saqlain5544/clearblock](https://github.com/saqlain5544/clearblock).
 
-Paste this in Terminal. Set `REPO_URL` to the GitHub clone URL of this project:
+Paste this in Terminal:
 
 ```bash
-REPO_URL='https://github.com/YOU/clearblock.git'   # replace with this repo
+REPO_URL='https://github.com/saqlain5544/clearblock.git'
 WORKDIR="$(mktemp -d)"
 git clone --depth 1 --filter=blob:none --sparse "$REPO_URL" "$WORKDIR"
 git -C "$WORKDIR" sparse-checkout set chrome-extensions/clearblock
@@ -35,10 +35,12 @@ rm -rf "$WORKDIR"
 echo "Installed ~/chrome-extensions/clearblock"
 ```
 
+SSH works the same if you swap in `git@github.com:saqlain5544/clearblock.git`.
+
 If you already have a clone of this repo:
 
 ```bash
-bash scripts/install-from-git.sh "$(git remote get-url origin)"
+bash scripts/install-from-git.sh
 ```
 
 That leaves the unpacked extension at **`~/chrome-extensions/clearblock`**.

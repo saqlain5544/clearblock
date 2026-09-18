@@ -1,20 +1,15 @@
 #!/usr/bin/env bash
-# Clone Clearblock from git and install the unpacked folder to
+# Clone Clearblock from GitHub and install the unpacked folder to
 # ~/chrome-extensions/clearblock (the path Chrome should Load unpacked).
 #
-#   bash scripts/install-from-git.sh https://github.com/<you>/<repo>.git
-#   CLEARBLOCK_GIT_URL=https://github.com/<you>/<repo>.git bash scripts/install-from-git.sh
+#   bash scripts/install-from-git.sh
+#   bash scripts/install-from-git.sh git@github.com:saqlain5544/clearblock.git
 set -euo pipefail
 
-REPO_URL="${1:-${CLEARBLOCK_GIT_URL:-}}"
+DEFAULT_REPO_URL='https://github.com/saqlain5544/clearblock.git'
+REPO_URL="${1:-${CLEARBLOCK_GIT_URL:-${DEFAULT_REPO_URL}}}"
 DEST="${HOME}/chrome-extensions/clearblock"
 REF="${CLEARBLOCK_GIT_REF:-}"
-
-if [[ -z "${REPO_URL}" ]]; then
-  echo "usage: $0 <git-clone-url>" >&2
-  echo "example: $0 https://github.com/<you>/clearblock.git" >&2
-  exit 1
-fi
 
 WORKDIR="$(mktemp -d)"
 cleanup() { rm -rf "${WORKDIR}"; }

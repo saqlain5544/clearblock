@@ -2,10 +2,10 @@
 
 Load **`clearblock`** in Chrome (the folder that contains `manifest.json`).
 
-On a Mac, clone this GitHub repo into `~/chrome-extensions/clearblock`:
+On a Mac:
 
 ```bash
-bash ../scripts/install-from-git.sh https://github.com/YOU/clearblock.git
+bash ../scripts/install-from-git.sh https://github.com/saqlain5544/clearblock.git
 ```
 
 Then Load unpacked **`~/chrome-extensions/clearblock`**.
