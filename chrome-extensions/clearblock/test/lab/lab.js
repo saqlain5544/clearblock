@@ -560,6 +560,32 @@
         card.style.cssText = "max-width:640px;min-height:72px;margin:12px auto;background:#eee;padding:8px;";
         document.body.appendChild(card);
       }, 4300);
+      setTimeout(() => {
+        const wrap = el("div", { "data-lab-ad": "athletic-sponsored-delayed" });
+        const slug = el("a", { class: "Content_SponsorSlug__IgjWM" });
+        slug.textContent = "SPONSORED BY";
+        wrap.appendChild(slug);
+        wrap.appendChild(document.createTextNode(" FanDuel leftover partner card"));
+        wrap.style.cssText = "max-width:320px;min-height:72px;margin:12px auto;background:#eee;padding:8px;";
+        document.body.appendChild(wrap);
+      }, 4400);
+      setTimeout(() => {
+        const banner = el("aside", {
+          class: "featured-posts-banner",
+          "data-lab-ad": "ninefive-banner-delayed",
+        });
+        banner.textContent = "Studio Display XDR: $330 off Buy from $2,969";
+        banner.style.cssText = "display:block;min-height:72px;margin:12px auto;background:#111;color:#fff;padding:8px;";
+        document.body.appendChild(banner);
+      }, 4500);
+      setTimeout(() => {
+        const side = el("aside", { class: "sidebar" });
+        const slot = el("div", { class: "hide-sm no-sticky", "data-lab-ad": "ninefive-rail-ad-delayed" });
+        slot.textContent = "Ad";
+        slot.style.cssText = "width:395px;min-height:80px;margin:12px auto;background:#222;color:#fff;padding:8px;";
+        side.appendChild(slot);
+        document.body.appendChild(side);
+      }, 4600);
     }
     const feed = document.getElementById("fb-feed");
     if (feed) {
