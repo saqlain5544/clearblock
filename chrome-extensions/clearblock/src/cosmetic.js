@@ -85,6 +85,10 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
 [data-lab-ad] {
   display: none !important;
 }
+.aol-grid:has(> [class*="dlRRad"]) > .dl-container {
+  grid-column: 1 / -1 !important;
+  width: 100% !important;
+}
 `;
 
   const EXTRA_HIDE = [
@@ -510,6 +514,19 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     }
   }
 
+  function hideAolLeftovers() {
+    if (!enabled) return;
+    for (const grid of document.querySelectorAll(".aol-grid")) {
+      const rail = grid.querySelector(":scope > [class*='dlRRad'], :scope > .m-static-gam");
+      if (!rail) continue;
+      hideNode(rail, true);
+      const dl = grid.querySelector(":scope > .dl-container");
+      if (!dl || dl.querySelector?.("video, audio, #movie_player")) continue;
+      dl.style.setProperty("grid-column", "1 / -1", "important");
+      dl.style.setProperty("width", "100%", "important");
+    }
+  }
+
   function sweep() {
     document.documentElement?.setAttribute("data-clearblock", enabled ? "on" : "off");
     hideMatches(EXTRA_HIDE, true);
@@ -520,6 +537,7 @@ a.me-stripe-tile-button:has(.me-stripe-title-subtitle),
     hideBareAdLabels();
     hideOptidigitalSlots();
     hideMsnNativeAds();
+    hideAolLeftovers();
     dismissNags();
   }
 
