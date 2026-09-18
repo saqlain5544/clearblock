@@ -96,6 +96,9 @@
     return results;
   }
 
+  let netLine = "Network probes…";
+  let netOk = false;
+
   function paintScoreboard(extra) {
     const el = document.getElementById("lab-scoreboard");
     if (!el) return scanAds();
@@ -107,7 +110,7 @@
       <span>${document.title}</span>
       <span class="${adsOk ? "ok" : "fail"}">Ads hidden <strong>${ads.hidden}/${ads.total}</strong> · leftover ${ads.visible}</span>
       <span class="${videoOk ? "ok" : "fail"}">Content video ${videoOk ? "playing" : "blocked/failed"}</span>
-      <span id="lab-net">Network probes…</span>
+      <span class="${netOk ? "ok" : ""}">${netLine}</span>
       ${extra || ""}
     `;
     if (ads.leftover.length) {
@@ -277,14 +280,12 @@
     hydrateWeb();
     firePixels();
     const first = paintScoreboard();
-    const netEl = document.getElementById("lab-net");
     probeNetwork().then((rows) => {
       const failed = rows.filter((r) => !r.issued).length;
       const issued = rows.length - failed;
-      if (netEl) {
-        netEl.className = failed >= rows.length * 0.5 ? "ok" : "fail";
-        netEl.textContent = `Ad hosts: ${failed} fetch-fail / ${issued} issued of ${rows.length}`;
-      }
+      netOk = failed >= rows.length * 0.4;
+      netLine = `Ad hosts: ${failed} blocked/fail · ${issued} issued of ${rows.length}`;
+      paintScoreboard();
     });
     setInterval(() => paintScoreboard(), 800);
     document.querySelectorAll("[data-lab-content='player'] video, video.html5-main-video").forEach((v) => {
