@@ -7,7 +7,7 @@ import json
 import re
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[1] / "chrome-extensions" / "clearblock"
 EASYLIST = ROOT / "filters" / "easylist.txt"
 RULES = ROOT / "rules"
 

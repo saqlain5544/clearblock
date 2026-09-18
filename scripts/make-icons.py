@@ -7,7 +7,7 @@ import struct
 import zlib
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[1] / "chrome-extensions" / "clearblock"
 OUT = ROOT / "icons"
 
 BG = (13, 42, 38, 255)
